@@ -1,0 +1,24 @@
+fileFormatVersion: 2
+guid: d156cd3dd8f11b44d8a74464ee107da7
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - speed: {instanceID: 0}
+  - rb: {instanceID: 0}
+  - currentAmmo: {instanceID: 0}
+  - ammoIcon: {instanceID: 0}
+  - bullets: {fileID: 2800000, guid: ea3c4098b65beca4ea193c161699925f, type: 3}
+  - shells: {fileID: 2800000, guid: aecf94847dcb9c84996942520b9c4559, type: 3}
+  - rockets: {fileID: 2800000, guid: def0f59c6527d444e880ac5f17f76784, type: 3}
+  - timer: {instanceID: 0}
+  - crosshair: {instanceID: 0}
+  - topLine: {instanceID: 0}
+  - bottomLine: {instanceID: 0}
+  - leftLine: {instanceID: 0}
+  - rightLine: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

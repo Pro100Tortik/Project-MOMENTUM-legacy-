@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: Menus Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: Menus
+  m_TableCollectionNameGuidString: 1f7c1967b8ee2be4c841d2abbb7bac37
+  m_Entries:
+  - m_Id: 44968185856
+    m_Key: exitKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3482858819584
+    m_Key: singlePlayerKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3526060150784
+    m_Key: settingsKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4309036044288
+    m_Key: backKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4791448113152
+    m_Key: newGameKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4800067407872
+    m_Key: selectLevelKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6698371649536
+    m_Key: episodeOneKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6762162819072
+    m_Key: episodeTwoKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6763886678016
+    m_Key: episodeThreeKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6813320744960
+    m_Key: testLevelsKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7333963894784
+    m_Key: surfLevelsKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9486841417728
+    m_Key: continueKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9547184869376
+    m_Key: restartKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9597982085120
+    m_Key: toMainMenuKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10829983387648
+    m_Key: youDiedKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11018353774592
+    m_Key: pressM1Key
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11747705491456
+    m_Key: sensitivityKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11850801483776
+    m_Key: masterVolumeKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11884771151872
+    m_Key: musicVolumeKey
+    m_Metadata:
+      m_Items: []
+  - m_Id: 11885647761408
+    m_Key: SFXVolumeKey
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 5562171245912915992
+  references:
+    version: 2
+    RefIds:
+    - rid: 5562171245912915992
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables,
+        asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1705149072899

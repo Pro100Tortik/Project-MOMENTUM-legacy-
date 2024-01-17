@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61e4456ed17468143bdd9ef2a48afb9e, type: 3}
+  m_Name: Dev Pistol
+  m_EditorClassIdentifier: 
+  safety: 0
+  canBeDualWielded: 0
+  ammoType: 0
+  damage: 9999
+  range: 1000
+  fireRate: 10
+  bulletsPerShot: 1
+  pellets: 1
+  spread: {x: 0, y: 0}
+  fire1: {fileID: 8300000, guid: e38ebb6df547fcc419e26570a77bab04, type: 3}
+  empty: {fileID: 8300000, guid: 8a10aadec9523ad4cafee1ba33157ee4, type: 3}
