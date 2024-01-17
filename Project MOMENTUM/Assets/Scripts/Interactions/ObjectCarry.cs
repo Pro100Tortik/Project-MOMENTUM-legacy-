@@ -14,11 +14,20 @@ public class ObjectCarry : MonoBehaviour
     [SerializeField] private float speed = 1000.0f;
     private float _restoreDrag;
     private Rigidbody _heldRB;
-    public static bool HaveItem { get; private set; }
+    private ClientStatus _status;
+    public bool HaveItem { get; private set; }
+
+    private void Awake()
+    {
+        _status = GetComponentInParent<ClientStatus>();
+    }
 
     private void Update()
     {
         HaveItem = _heldRB != null;
+
+        if (_status.CurrentClientState != PlayerState.Gameplay)
+            return;
 
         if (Input.GetKeyDown(KeyCode.E))
         {
@@ -59,13 +68,14 @@ public class ObjectCarry : MonoBehaviour
 
     private void PickUp()
     {
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, pickupRange))
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, pickupRange, -1 , QueryTriggerInteraction.Ignore))
         {
             hit.transform.TryGetComponent<Rigidbody>(out _heldRB);
             if (_heldRB != null)
             {
                 if (_heldRB.mass > carryMaxWeight)
                 {
+                    _heldRB = null;
                     return;
                 }
 
