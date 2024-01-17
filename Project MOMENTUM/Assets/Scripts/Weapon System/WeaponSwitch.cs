@@ -130,7 +130,7 @@ public class WeaponSwitch : MonoBehaviour
 
     private void ChangeOnPickup(WeaponDataSO weapon)
     {
-        if (ObjectCarry.HaveItem)
+        if (carry.HaveItem)
             return;
 
         for (int i = 0;i < weapons.Count;i++)
@@ -142,7 +142,7 @@ public class WeaponSwitch : MonoBehaviour
 
     private void ChangeOnSecondPickup(WeaponDataSO weapon)
     {
-        if (ObjectCarry.HaveItem)
+        if (carry.HaveItem)
             return;
 
         ChangeOnPickup(weapon);

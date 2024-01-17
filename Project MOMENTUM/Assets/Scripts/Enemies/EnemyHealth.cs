@@ -40,7 +40,7 @@ public class EnemyHealth : MonoBehaviour, IDamagable
 
         PlayPainSound();
 
-        if (delta < 0)
+        if (delta <= 0)
         {
             _isDead = true;
             health = delta;
