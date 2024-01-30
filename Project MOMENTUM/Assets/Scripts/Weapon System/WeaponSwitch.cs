@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class WeaponSwitch : MonoBehaviour
 {
-    [SerializeField] private ObjectCarry carry;
     [SerializeField] private WeaponInventory weaponInventory;
     [SerializeField] private int startWeapon;
     [SerializeField] private List<GameObject> weapons;
@@ -29,16 +28,12 @@ public class WeaponSwitch : MonoBehaviour
     {
         weaponInventory.OnWeaponPickedUp += ChangeOnPickup;
         weaponInventory.OnSecondWeaponPickedUp += ChangeOnSecondPickup;
-        carry.OnPikcup += DisableWeapons;
-        carry.OnRelease += EnableCurrentWeapon;
     }
 
     private void OnDisable()
     {
         weaponInventory.OnWeaponPickedUp -= ChangeOnPickup;
         weaponInventory.OnSecondWeaponPickedUp -= ChangeOnSecondPickup;
-        carry.OnPikcup -= DisableWeapons;
-        carry.OnRelease -= EnableCurrentWeapon;
     }
 
     private void Update()
@@ -130,9 +125,6 @@ public class WeaponSwitch : MonoBehaviour
 
     private void ChangeOnPickup(WeaponDataSO weapon)
     {
-        if (carry.HaveItem)
-            return;
-
         for (int i = 0;i < weapons.Count;i++)
         {
             if (GetWeaponData(i) == weapon)
@@ -142,9 +134,6 @@ public class WeaponSwitch : MonoBehaviour
 
     private void ChangeOnSecondPickup(WeaponDataSO weapon)
     {
-        if (carry.HaveItem)
-            return;
-
         ChangeOnPickup(weapon);
         for (int i = 0; i < weapons.Count; i++)
         {

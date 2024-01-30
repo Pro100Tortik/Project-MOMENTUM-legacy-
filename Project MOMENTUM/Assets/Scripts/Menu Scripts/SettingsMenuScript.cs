@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class SettingsMenuScript : MonoBehaviour
@@ -36,7 +35,7 @@ public class SettingsMenuScript : MonoBehaviour
     public void SetMasterVolume(float volume)
     {
         audioMixer.SetFloat("Master", volume);
-        settings.masterVolume = volume;
+        //settings.masterVolume = volume;
     }
 
     public void SetMusicVolume(float volume)
@@ -57,7 +56,8 @@ public class SettingsMenuScript : MonoBehaviour
     {
         sensitivity.value = settings.sensitivity;
 
-        masterVolume.value = settings.masterVolume;
+        audioMixer.GetFloat("Master", out float da);
+        masterVolume.value = da;    
 
         musicVolume.value = settings.musicVolume;
 

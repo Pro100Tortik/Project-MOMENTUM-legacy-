@@ -1,15 +1,18 @@
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class PropImpactSound : MonoBehaviour
 {
     [SerializeField] private float hitVelocity = 1.0f;
     [SerializeField, Range(0.0f, 1.0f)] private float volume = 0.5f;
     [SerializeField] private AudioClip[] sounds;
+    [SerializeField] private AudioMixerGroup sfx;
     private AudioSource _source;
 
     private void Awake()
     {
         _source = gameObject.AddComponent<AudioSource>();
+        _source.outputAudioMixerGroup = sfx;
         _source.volume = volume;
     }
 
