@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour
     //private bool _wasInWater;
 
     private Rigidbody _rb;
-    private CapsuleCollider _collider;
+    private BoxCollider _boxCollider;
 
     private Vector3 _groundNormal;
     private Vector3 _ladderNormal;
@@ -84,13 +84,15 @@ public class PlayerController : MonoBehaviour
 
         _status = GetComponentInParent<ClientStatus>();
 
-        TryGetComponent<CapsuleCollider>(out _collider);
+        TryGetComponent<BoxCollider>(out _boxCollider);
     }
 
     private void Update()
     {
         if (!_died)
-            _collider.enabled = moveType != MoveType.Noclip;
+        {
+            _boxCollider.enabled = moveType != MoveType.Noclip;
+        }
 
         GetMoveDir();
 
@@ -335,56 +337,58 @@ public class PlayerController : MonoBehaviour
         _rb.useGravity = false;
 
         wishvel = _inputForward * cam.forward + _inputRight * cam.right;
+        wishvel.Normalize();
         wishvel *= cvars.waterSpeed;
 
-        if (_wishJump)
+        if (!CanAccelerate() || (_inputForward == 0 && _inputRight == 0))
         {
-            if (CanAccelerate())
-                wishvel.y += cvars.waterSpeed;
-        }
-        else if (_inputForward == 0 && _inputRight == 0)
-        {
-            wishvel.y -= cvars.sinkSpeed;
-        }
-        else
-        {
-            if (CanAccelerate())
-                wishvel.y = _inputForward * cam.forward.y * cvars.waterSpeed;
+            _vel.y -= cvars.sinkSpeed;
         }
 
-        if (_waterDepth <= cvars.waterLevelToJumpOut && _wishJump)
+        if (CanAccelerate())
         {
-            var extents = _collider.bounds.extents;
-            extents.y = .1f;
-            extents.x *= 1.1f;
-            extents.z *= 1.1f;
-            if (Physics.CheckBox(transform.position, extents, Quaternion.identity, 1 << 0, QueryTriggerInteraction.Ignore))
+            if (_wishJump)
             {
-                _vel.y += cvars.waterJumpOutPower;
+                wishvel.y = cvars.waterSpeed * 0.7f;
+            }
+        }
+
+        // Jump out, ledge check
+        if (CanAccelerate())
+        {
+            if (_waterDepth <= cvars.waterLevelToJumpOut && _wishJump)
+            {
+                var extents = _boxCollider.bounds.extents;
+                extents.y = .1f;
+                extents.x *= 1.1f;
+                extents.z *= 1.1f;
+                if (Physics.CheckBox(transform.position, extents, Quaternion.identity, 1 << 0, QueryTriggerInteraction.Ignore))
+                {
+                    _vel.y = cvars.waterJumpOutPower;
+                }
             }
         }
 
         wishdir = wishvel;
         wishspeed = wishdir.magnitude;
-        wishdir.Normalize();
 
-        if (wishspeed > cvars.waterSpeed)
-        {
-            wishvel *= cvars.maxSpeed / cvars.waterSpeed;
-            wishspeed = cvars.maxSpeed;
-        }
+        //if (wishspeed > cvars.waterSpeed)
+        //{
+        //    wishvel *= cvars.maxSpeed / cvars.waterSpeed;
+        //    wishspeed = cvars.maxSpeed;
+        //}
 
         wishspeed *= 0.7f;
 
         speed = _vel.magnitude;
         if (speed > 0)
         {
-            newspeed = speed - Time.deltaTime * speed * cvars.waterFriction;
+            newspeed = speed - Time.deltaTime * cvars.waterSpeed * cvars.waterFriction;
             if (newspeed < 0.1f)
             {
                 newspeed = 0;
             }
-            _vel *= newspeed / speed;
+            //_vel *= newspeed / speed;
         }
         else
         {
@@ -397,7 +401,7 @@ public class PlayerController : MonoBehaviour
             if (addspeed > 0)
             {
                 wishvel.Normalize();
-                accelspeed = cvars.acceleration * wishspeed * Time.deltaTime;
+                accelspeed = _currentAccel * 2 * wishspeed * Time.deltaTime;
                 if (accelspeed > addspeed)
                 {
                     accelspeed = addspeed;
@@ -427,6 +431,12 @@ public class PlayerController : MonoBehaviour
 
     private void JumpQueue()
     {
+        if (!CanAccelerate())
+        {
+            _wishJump = false;
+            return;
+        }
+
         if (AutoJump)
         {
             _wishJump = Input.GetKey(KeyCode.Space);
@@ -455,7 +465,7 @@ public class PlayerController : MonoBehaviour
 
         _isGrounded = false;
         _rb.drag = 0;
-        _vel.y += cvars.jumpForce;
+        _vel.y = cvars.jumpForce;
         OnJump?.Invoke(jumpSound);
         _jumpTimer = 0.15f;
         _wishJump = false;
@@ -469,13 +479,13 @@ public class PlayerController : MonoBehaviour
         if (_isCrouching)
         {
             head.localPosition = Vector3.up * 0.25f; // crouch
-            _collider.height = cvars.crouchHeight;
+            _boxCollider.size = new Vector3(1, cvars.crouchHeight, 1);
             _wasCrouching = true;
         }
         else if (CanUncrouch() && !_isCrouching)
         {
             head.localPosition = Vector3.up * 0.75f;
-            _collider.height = cvars.playerHeight;
+            _boxCollider.size = new Vector3(1, cvars.playerHeight, 1);
             _wasCrouching = false;
         }
 
