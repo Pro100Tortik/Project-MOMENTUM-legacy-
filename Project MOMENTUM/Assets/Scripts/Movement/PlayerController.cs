@@ -87,6 +87,14 @@ public class PlayerController : MonoBehaviour
         TryGetComponent<BoxCollider>(out _boxCollider);
     }
 
+    private void Start()
+    {
+        DeveloperConsole.RegisterCommand(new ConsoleCommand("autojump", "", "Enables autohump.", args =>
+        {
+            AutoJump = !AutoJump;
+        }));
+    }
+
     private void Update()
     {
         if (!_died)
@@ -479,13 +487,13 @@ public class PlayerController : MonoBehaviour
         if (_isCrouching)
         {
             head.localPosition = Vector3.up * 0.25f; // crouch
-            _boxCollider.size = new Vector3(1, cvars.crouchHeight, 1);
+            _boxCollider.size = new Vector3(_boxCollider.size.x, cvars.crouchHeight, _boxCollider.size.z);
             _wasCrouching = true;
         }
         else if (CanUncrouch() && !_isCrouching)
         {
             head.localPosition = Vector3.up * 0.75f;
-            _boxCollider.size = new Vector3(1, cvars.playerHeight, 1);
+            _boxCollider.size = new Vector3(_boxCollider.size.x, cvars.playerHeight, _boxCollider.size.z);
             _wasCrouching = false;
         }
 
