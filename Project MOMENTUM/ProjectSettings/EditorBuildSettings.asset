@@ -9,26 +9,11 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: c535fc338e99ebd449e1f4e95ced56fe
   - enabled: 1
-    path: Assets/Scenes/Testing/dev_test.unity
-    guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
-    path: Assets/Scenes/Surf/surf_lab.unity
-    guid: 8c12a80515154be4ab7298ba4bd9504e
-  - enabled: 1
-    path: Assets/Scenes/Episode1(Labs)/e1m2.unity
-    guid: fee0f51bcdb2b6042ae4cae5e0771b72
-  - enabled: 1
-    path: Assets/Scenes/Episode1(Labs)/e1m1.unity
-    guid: 1ef5ee1dfe14db1479f0414528bcf1b3
-  - enabled: 0
-    path: Assets/Scenes/Episode1(Labs)/e1m3.unity
-    guid: 932e32baa9b05f44793a3a53e21a5ef2
-  - enabled: 1
-    path: Assets/Scenes/Surf/surf_xmas.unity
-    guid: 26475682c66577a4ab0044f30bf4cccc
-  - enabled: 1
-    path: Assets/Scenes/Testing/fy_pool_day.unity
+    path: Assets/Scenes/fy_pool_day.unity
     guid: b314212f2d58bd349a9f4bf47641b0c2
+  - enabled: 1
+    path: Assets/Scenes/lvl.unity
+    guid: da17bdf279f685f4d9d0a72111aa74aa
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 82cfc127f0181c84a912b9e2cd3a2708,
       type: 2}

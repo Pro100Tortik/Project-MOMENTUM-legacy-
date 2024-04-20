@@ -3,9 +3,8 @@ using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour, IDamagable
 {
-    internal event Action<GameObject> OnDamaged;
-
-    //[SerializeField] private GameObject parentGameobject;
+    public event Action<GameObject> OnDamaged;
+    public bool IsDead { get; private set; }
 
     [Header("Sounds")]
     [SerializeField] private AudioSource painSource;
@@ -13,10 +12,9 @@ public class EnemyHealth : MonoBehaviour, IDamagable
     [SerializeField] private float painTimerCooldown = 0.4f;
 
     [Header("Parameters")]
-    [SerializeField] private int health = 35;
+    [SerializeField] private float health = 35;
     [SerializeField] private int overkillDamage = -15;
     private GibSpawner _gibSpawner;
-    internal bool _isDead;
     private float _painTimer;
 
     private void Awake() => _gibSpawner = GetComponentInParent<GibSpawner>();
@@ -33,16 +31,16 @@ public class EnemyHealth : MonoBehaviour, IDamagable
             _painTimer = 0;
     }
 
-    public void Damage(GameObject attacker, int damage)
+    public void Damage(GameObject attacker, float damage)
     {
         OnDamaged?.Invoke(attacker);
-        int delta = health - damage;
+        float delta = health - damage;
 
         PlayPainSound();
 
         if (delta <= 0)
         {
-            _isDead = true;
+            IsDead = true;
             health = delta;
         }
 

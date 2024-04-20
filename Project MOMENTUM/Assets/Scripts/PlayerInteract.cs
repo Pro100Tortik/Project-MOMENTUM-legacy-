@@ -17,7 +17,7 @@ public class PlayerInteract : MonoBehaviour
 
     private void Update()
     {
-        if (_status.CurrentClientState != PlayerState.Gameplay)
+        if (!_status.CanReadInputs())
         {
             return;
         }

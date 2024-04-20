@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class EnemyFOV : MonoBehaviour
 {
-    [SerializeField] private float eyesHeight = 0.75f;
+    public float eyesHeight = 0.75f;
     public float viewRadius = 20.0f;
     [Range(0, 360)]
     public float viewAngle = 100.0f;

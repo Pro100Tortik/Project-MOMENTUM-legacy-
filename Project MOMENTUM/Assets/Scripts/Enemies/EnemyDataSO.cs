@@ -8,13 +8,11 @@ public class EnemyDataSO : ScriptableObject
     public float chaseSpeed = 10.0f;
 
     [Header("Enemy FOV")]
-    [Range(0, 360)] public float FOV = 100.0f;
-    public float sightDistance = 40.0f;
     public int health = 40;
 
     [Header("Combat")]
-    public float reactionTime = 0.5f;
-    public float moveTime = 0.4f;
+    public int reactionTime = 7;
+    public int moveTicks = 15;
 
     //public int killCost;
 }

@@ -24,10 +24,10 @@ TagManager:
   - GIBS
   - Projectiles
   - Interaction
-  - 
-  - 
-  - 
-  - 
+  - Invisible Wall
+  - Hitbox
+  - ShootThrough
+  - Transparent
   - 
   - 
   - 
