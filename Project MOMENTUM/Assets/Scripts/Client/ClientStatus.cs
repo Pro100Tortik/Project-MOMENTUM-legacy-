@@ -2,135 +2,157 @@ using UnityEngine;
 
 public class ClientStatus : MonoBehaviour
 {
-    [SerializeField] private PlayerState playerState = PlayerState.Gameplay;
-    [SerializeField] private MenuState menuState = MenuState.Pause;
+    public bool IsDead { get; private set; } = false;
+    public bool IsPaused { get; private set; } = false;
+
+    [SerializeField] private DeveloperConsole console;
+    [SerializeField] private GameObject UI;
     [SerializeField] private GameObject pauseMenu;
     [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject gameOverMenu;
     [SerializeField] private GameObject gameName;
-    [SerializeField] private GameObject intermissionScreen;
     [SerializeField] private float gameOverRestartDelay = 1.0f;
     private float _gameOverTimer;
     private PlayerHealth playerHealth;
+    private GameManager _gm;
 
-    #region Readonly Variables
-    public PlayerState CurrentClientState => playerState;
-    #endregion
+    public bool Crutch()
+    {
+        if (console.IsConsoleOpened) return false;
 
-    #region Changing Variables
-    public void Die() => playerState = PlayerState.Dead;
+        return true;
+    }
 
-    public void ContinueGame() => playerState = PlayerState.Gameplay;
+    public bool CanReadInputs()
+    {
+        //if (IsDead) return false;
 
-    public void GoToPause() => menuState = MenuState.Pause;
+        if (IsPaused) return false;
 
-    public void GoToSettings() => menuState = MenuState.Settings;
-    #endregion
+        if (console.IsConsoleOpened) return false;
+
+        return true;
+    }
+
+    public void Pause()
+    {
+        IsPaused = !IsPaused;
+
+        DisableAllMenus();
+
+        //if (!_gm.IsMultiplayer)
+        //{
+            Time.timeScale = IsPaused ? 0.0f : 1.0f;
+        //}
+
+        if (IsPaused)
+        {
+            GameFunctions.EnableCursor();
+            pauseMenu.SetActive(true);
+        }
+        else
+        {
+            GameFunctions.DisableCursor();
+        }
+    }
+
+    public void Settings()
+    {
+        DisableAllMenus();
+        settingsMenu.SetActive(true);
+    }
+
+    public void GoBack()
+    {
+        if (console.IsConsoleOpened)
+        {
+            console.ToggleConsole();
+            return;
+        }
+
+        if (settingsMenu.activeInHierarchy)
+        {
+            EnablePauseMenu();
+        }
+        else
+        {
+            Pause();
+        }
+    }
 
     private void Awake()
     {
         _gameOverTimer = gameOverRestartDelay;
         playerHealth = GetComponentInChildren<PlayerHealth>();
+        _gm = GameManager.Instance;
+
+        IsPaused = false;
+
+        Time.timeScale = IsPaused ? 0.0f : 1.0f;
+        GameFunctions.DisableCursor();
+        DisableAllMenus();
     }
 
     private void Start() => playerHealth.OnDeath += Die;
-
+    
     private void OnDestroy() => playerHealth.OnDeath -= Die;
+
+    private void Die() => IsDead = true;
 
     private void Update()
     {
-        GameStates();
-        MenuStates();
         GameOverScreen();
-        Intermission();
-
-        gameOverMenu.SetActive(playerState == PlayerState.Dead);
-        intermissionScreen.SetActive(playerState == PlayerState.Intermission);
-
-        // Time.timeScale = gameState == GameState.Menus ? 0.0f : 1.0f;
-
-        //if (gameState == PlayerState.Dead)
-        //    return;
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (playerState == PlayerState.Intermission)
-                return;
+            GoBack();
+        }
 
-            if (playerState == PlayerState.Dead)
-                return;
-
-            if (playerState != PlayerState.Menus)
+        if (!IsPaused)
+        {
+            if (console.IsConsoleOpened)
             {
-                playerState = PlayerState.Menus;
-                GoToPause();
+                GameFunctions.EnableCursor();
             }
             else
             {
-                if (menuState != MenuState.Pause)
-                {
-                    GoToPause();
-                }
-                else
-                {
-                    ContinueGame();
-                }
+                GameFunctions.DisableCursor();
             }
         }
     }
 
-    private void GameStates()
+    private void EnablePauseMenu()
     {
-        switch (playerState)
-        {
-            case PlayerState.Menus:
-                EnableCursor();
-                break;
-
-            case PlayerState.Gameplay:
-            case PlayerState.Intermission:
-            case PlayerState.Dead:
-                DisableCursor();
-                break;
-        }
+        DisableAllMenus();
+        pauseMenu.SetActive(true);
     }
 
-    private void MenuStates()
+    private void DisableAllMenus()
     {
-        gameName.SetActive(playerState == PlayerState.Menus);
-        pauseMenu.SetActive(playerState == PlayerState.Menus && menuState == MenuState.Pause);
-        settingsMenu.SetActive(playerState == PlayerState.Menus && menuState == MenuState.Settings);
+        pauseMenu.SetActive(false);
+        settingsMenu.SetActive(false);
+        gameOverMenu.SetActive(false);
+        gameName.SetActive(IsPaused);
     }
 
     private void GameOverScreen()
     {
-        if (playerState != PlayerState.Dead)
+        if (!IsDead)
             return;
+
+        gameOverMenu.SetActive(true);
+        UI.SetActive(false);
 
         if (_gameOverTimer > 0)
             _gameOverTimer -= Time.fixedDeltaTime;
 
-        if (Input.GetMouseButtonDown(0) && _gameOverTimer <= 0)
-            LevelManager.RestartLevel();
-    }
-
-    private void Intermission()
-    {
-        if (playerState != PlayerState.Intermission)
-        {
+        if (IsPaused)
             return;
+
+        if (Input.GetMouseButtonDown(0) && _gameOverTimer <= 0)
+        {
+            if (!_gm.IsMultiplayer)
+                GameFunctions.RestartLevel();
         }
-    }
-
-    private void EnableCursor()
-    {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-    }
-
-    private void DisableCursor()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 }

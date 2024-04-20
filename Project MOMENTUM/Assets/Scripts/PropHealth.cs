@@ -4,9 +4,9 @@ using UnityEngine.Events;
 public class PropHealth : MonoBehaviour, IDamagable
 {
     public UnityEvent OnDestroyed;
-    [SerializeField] private int health;
+    [SerializeField] private float health;
 
-    public void Damage(GameObject attacker, int damage)
+    public void Damage(GameObject attacker, float damage)
     {
         health -= damage; 
 

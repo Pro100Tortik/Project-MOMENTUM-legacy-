@@ -8,48 +8,54 @@ public class BasicEnemyAi : MonoBehaviour
     [SerializeField] private EnemyState currentState = EnemyState.Idle;
     [SerializeField] private Transform head;
     [SerializeField] private Transform body;
-    [SerializeField] private Rigidbody rigidBody;
     [SerializeField] private EnemyHealth enemyHealth;
 
     private EnemyFOV _enemyFOV;
     private NavMeshAgent _agent;
 
     private Transform _target;
-    private Vector3 _lastKnowPos;
+    private Vector3 _lastKnownPos;
 
-    private float _moveTimer;
+    private int _ticks;
     private float _reactionTimer;
-    private float _attackTimer;
 
     private bool _isAwake = false;
 
-    private float GetDistanceToTarget() => Vector3.Distance(transform.position, _target.position);
+    private float GetDistanceToTarget() => _target == null ? _agent.stoppingDistance + 1 
+        : Vector3.Distance(transform.position, _target.position);
 
-    private bool CanAttack() => GetDistanceToTarget() <= 5 && _enemyFOV.CanSeeTarget;
+    private bool CanAttack() => GetDistanceToTarget() <= _agent.stoppingDistance && _enemyFOV.CanSeeTarget;
 
     private void Awake()
     {
         _enemyFOV = GetComponent<EnemyFOV>();
         _agent = GetComponent<NavMeshAgent>();
-        rigidBody.isKinematic = true;
-        rigidBody.useGravity = false;
+
+        _ticks += Random.Range(-7, 11);
     }
 
     private void OnEnable() => enemyHealth.OnDamaged += SearchAttacker;
 
     private void OnDisable() => enemyHealth.OnDamaged -= SearchAttacker;
 
-    private void Update()
+    private void FixedUpdate()
     {
+        //_rb.MovePosition(_agent.destination);
+
+        _ticks += 1;
+        if (_isAwake)
+        {
+            //_attackTimer += Time.deltaTime;
+            _reactionTimer += Time.deltaTime;
+        }
+
         DecideWhatToDo();
 
-        if (enemyHealth._isDead)
+        if (enemyHealth.IsDead)
         {
             currentState = EnemyState.Dead;
             return;
         }
-
-        rigidBody.position = transform.position + Vector3.up;
 
         if (_enemyFOV.CanSeeTarget)
         {
@@ -64,34 +70,28 @@ public class BasicEnemyAi : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
+    private void MoveAgentTo(Vector3 position, float speed, float radius)
     {
-        //_rb.MovePosition(_agent.destination);
+        if (_agent == null)
+            return;
 
-        _moveTimer += Time.deltaTime;
-        if (_isAwake)
-        {
-            //_attackTimer += Time.deltaTime;
-            _reactionTimer += Time.deltaTime;
-        }
-    }
-
-    private void MoveAgentTo(Vector3 position, float speed)
-    {
-        _agent.SetDestination(position + (Random.insideUnitSphere * 5));
+        _agent.SetDestination(position + (Random.insideUnitSphere * radius));
         _agent.speed = speed;
-        _moveTimer = 0;
+        _ticks = 0;
     }
 
     private void LookAt(Vector3 whatPos)
     {
         if (whatPos == Vector3.zero) return;
 
+        if (enemyHealth.IsDead)
+            return;
+
         head.LookAt(whatPos + (Vector3.up * 1.0f));
         var lookDir = whatPos - body.position;
         lookDir.y = 0;
         var rotation = Quaternion.LookRotation(lookDir);
-        rigidBody.rotation = Quaternion.Slerp(rigidBody.rotation, rotation, 0.2f);
+        transform.rotation = rotation;
     }
 
     private void DecideWhatToDo()
@@ -107,7 +107,7 @@ public class BasicEnemyAi : MonoBehaviour
                 break;
 
             case EnemyState.Search:
-                MoveAgentTo(_lastKnowPos, enemyData.chaseSpeed);
+                MoveAgentTo(_lastKnownPos, enemyData.chaseSpeed, 3);
                 break;
 
             case EnemyState.Attack:
@@ -117,9 +117,6 @@ public class BasicEnemyAi : MonoBehaviour
 
             case EnemyState.Dead:
                 _agent.SetDestination(transform.position);
-
-                rigidBody.isKinematic = false;
-                rigidBody.useGravity = true;
                 break;
         }
     }
@@ -129,10 +126,11 @@ public class BasicEnemyAi : MonoBehaviour
         if (_reactionTimer > enemyData.reactionTime && CanAttack())
         {
             currentState = EnemyState.Attack;
+            _agent.SetDestination(transform.position);
         }
-        else if (_moveTimer > enemyData.moveTime)
+        else if (_ticks > enemyData.moveTicks)
         {
-            MoveAgentTo(_target.position, enemyData.chaseSpeed);
+            MoveAgentTo(_target.position, enemyData.chaseSpeed, 1);
         }
     }
 
@@ -142,17 +140,17 @@ public class BasicEnemyAi : MonoBehaviour
             return;
 
         _isAwake = true;
-        _lastKnowPos = attacker.transform.position;
-        LookAt(_lastKnowPos);
+        _lastKnownPos = attacker.transform.position;
+        LookAt(_lastKnownPos);
         currentState = EnemyState.Search;
     }
 
     private void Patrol()
     {
-        if (_moveTimer > Random.Range(3, 5))
+        if (_ticks > enemyData.moveTicks)
         {
             _agent.SetDestination(transform.position + (Random.insideUnitSphere * 10));
-            _moveTimer = 0;
+            _ticks = 0;
         }
     }
 
