@@ -12,19 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61e4456ed17468143bdd9ef2a48afb9e, type: 3}
   m_Name: Rocket Launcher
   m_EditorClassIdentifier: 
-  safety: 1
-  canBeDualWielded: 0
-  ammoType: 3
-  minDamage: 0
-  maxDamage: 0
-  range: 200
-  fireRate: 1.6
-  bulletsPerShot: 1
+  safetyLock: 0
+  primaryAmmoType: 4
+  secondaryAmmoType: 0
   pellets: 0
   spread: {x: 0, y: 0}
-  returnSpeed: 12
-  kickBackPower: 0.4
-  kickBackSnap: 5
-  kickRotation: 4
+  holdToShootPrimary: 1
+  primaryDamage: 0
+  primaryRange: 100
+  primaryFireRate: 1.7
+  primaryUseAmmo: 1
+  bulletsPerShotPrimary: 1
+  holdToShootSecondary: 1
+  secondaryDamage: 0
+  secondaryRange: 0
+  secondaryFireRate: 0
+  secondaryUseAmmo: 1
+  bulletsPerShotSecondary: 0
   fire1: {fileID: 8300000, guid: 2d332d797df7e2c469522d9de9aae896, type: 3}
+  fire2: {fileID: 0}
   empty: {fileID: 8300000, guid: 8a10aadec9523ad4cafee1ba33157ee4, type: 3}

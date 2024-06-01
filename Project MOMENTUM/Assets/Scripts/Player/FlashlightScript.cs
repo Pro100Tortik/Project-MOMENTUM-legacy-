@@ -2,23 +2,22 @@ using UnityEngine;
 
 public class FlashlightScript : MonoBehaviour
 {
+    [SerializeField] private Player player;
     [SerializeField] private bool isEnabled = false;
     [SerializeField] private AudioClip flashlightSound;
     [SerializeField] private AudioSource source;
     private Light _light = null;
-    private ClientStatus _status;
 
     private void Awake()
     {
         _light = GetComponent<Light>();
 
         _light.enabled = isEnabled;
-        _status = GetComponentInParent<ClientStatus>();
     }
 
     private void Update()
     {
-        if (!_status.CanReadInputs())
+        if (!player.CanReadInputs())
             return;
 
         if (Input.GetKeyDown(KeyCode.F))

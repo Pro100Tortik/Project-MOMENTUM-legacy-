@@ -1,3 +1,4 @@
+using ProjectMOMENTUM;
 using System;
 using UnityEngine;
 
@@ -35,12 +36,18 @@ public class ProjectileScript : MonoBehaviour
             if (other.gameObject == _attacker)
                 return;
 
-            _exploded = true;
-
             if (other.TryGetComponent<IDamagable>(out IDamagable damagable))
             {
+                if (damagable == _attacker.GetComponentInChildren<IDamagable>())
+                {
+                    //Debug.Log("Attacker being attacked");
+                    return;
+                }
+
                 damagable.Damage(_attacker, 100);
             }
+
+            _exploded = true;
 
             Explode();
         }
@@ -68,12 +75,13 @@ public class ProjectileScript : MonoBehaviour
             Rigidbody rb = collider.GetComponent<Rigidbody>();
             if (rb != null)
                 rb.AddExplosionForce(explosionPower,
-                    transform.position, explosionRadius);
+                    transform.position, explosionRadius, 1.5f, ForceMode.Impulse);
 
-            IDamagable damagable = collider.GetComponent<IDamagable>();
-
-            if (damagable != null)
-                damagable.Damage(_attacker, 30);
+            if (collider.TryGetComponent<IDamagable>(out IDamagable damagable))
+            {
+                bool minDmg = damagable == _attacker.GetComponentInChildren<IDamagable>();
+                damagable.Damage(_attacker, (minDmg ? 0.4f : 1f) * 30);
+            }
         }
         _rb.velocity = Vector3.zero;
         OnHit?.Invoke(gameObject);

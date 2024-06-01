@@ -21,7 +21,7 @@ public class PlayerStepSounds : MonoBehaviour
         {
             Ray ray = new Ray(transform.position, Vector3.down * (playerCollider.height + 0.2f));
 
-            if (controller.OnGround && controller.PlayerVelocity != Vector3.zero && Physics.Raycast(ray, out RaycastHit hit, 1.0f))
+            if (controller.OnGround && controller.Velocity != Vector3.zero && Physics.Raycast(ray, out RaycastHit hit, 1.0f))
             {
                 if (hit.collider.TryGetComponent<Terrain>(out Terrain terrain))
                 {

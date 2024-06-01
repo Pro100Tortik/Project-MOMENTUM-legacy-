@@ -1,34 +1,47 @@
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager : Singleton<GameManager>
 {
-    public static GameManager Instance { get; private set; }
-
+    public bool IsPaused { get; private set; } = false;
     public bool IsMultiplayer { get; private set; } = false;
+    public bool IsAutoRespawn { get; private set; } = false;
+    public float RespawnTime { get; private set; } = 1.0f;
 
-    #region Difficulties
+    private float _lastTimeScale;
+
     [SerializeField] private GameDifficulty difficulty = GameDifficulty.NotSoCasual;
+
     public GameDifficulty GetDifficultyLevel() => difficulty;
-    public void SetDifficultyNoob() => difficulty = GameDifficulty.CanIPlayDaddy;
-    public void SetDifficultyEasy() => difficulty = GameDifficulty.ICanDoIT;
-    public void SetDifficultyNormal() => difficulty = GameDifficulty.NotSoCasual;
-    public void SetDifficultyTrue() => difficulty = GameDifficulty.UltraViolence;
-    public void SetDifficultyNightmare() => difficulty = GameDifficulty.Nightmare;
-    #endregion
+
+    public void SetDifficultyLevel(GameDifficulty difficulty) => this.difficulty = difficulty;
+
+    public void SetTimescale(float value, bool isHost)
+    {
+        if (IsMultiplayer && !isHost)
+            return;
+
+        _lastTimeScale = Time.timeScale;
+        Time.timeScale = value;
+        IsPaused = Time.timeScale == 0;
+    }
+
+    public void Respawn()
+    {
+        if (IsMultiplayer)
+        {
+            // Handle respawn
+        }
+        else
+        {
+            // if no checkpoints
+            // Well there is no :D
+            GameFunctions.RestartLevel();
+        }
+    }
 
     private void Awake()
     {
-        if (Instance != null)
-        {
-            //Debug.Log("Yep another GameManager");
-            Destroy(gameObject);
-        }
-        else
-            Instance = this;
-
-        DontDestroyOnLoad(gameObject);
-
-        IsMultiplayer = false;
+        GameFunctions.DisableCursor();
     }
 
     private void Start()
@@ -37,5 +50,13 @@ public class GameManager : MonoBehaviour
         {
             GameFunctions.ChangeLevel(args[1]);
         });
+    }
+
+    public void Pause(bool isHost)
+    {
+        if (IsMultiplayer && !isHost)
+            return;
+
+        SetTimescale(_lastTimeScale, isHost);
     }
 }

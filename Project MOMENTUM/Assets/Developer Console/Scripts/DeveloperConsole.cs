@@ -1,25 +1,38 @@
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 using System;
+using TMPro;
 
-public class DeveloperConsole : MonoBehaviour
+public class DeveloperConsole : Singleton<DeveloperConsole>
 {
+    [Header("References")]
+    [SerializeField] private PredictionPanels panels;
+
     [Header("UI Elements")]
     [SerializeField] private Canvas consoleCanvas;
     [SerializeField] private TMP_Text consoleLogs;
-    [SerializeField] private TMP_Text consolePredict;
     [SerializeField] private TMP_InputField consoleInput;
 
     [Header("Console Settings")]
+    [SerializeField] private int maxLogs = 128;
+    [SerializeField] private int maxInputCommandMemory = 32;
+
+    [Header("Keybinds")]
     [SerializeField] private KeyCode consoleToggleKey = KeyCode.BackQuote;
     [SerializeField] private KeyCode consoleSubmitKey = KeyCode.Return;
-    [SerializeField] private KeyCode consolePredictConfirmKey = KeyCode.Tab;
-    [SerializeField] private int maxLogs = 128;
+    [SerializeField] private KeyCode consoleTabKey = KeyCode.Tab;
+    [SerializeField] private KeyCode consoleLeftKey = KeyCode.LeftArrow;
+    [SerializeField] private KeyCode consoleRightKey = KeyCode.RightArrow;
+    [SerializeField] private KeyCode consoleUpKey = KeyCode.UpArrow;
+    [SerializeField] private KeyCode consoleDownKey = KeyCode.DownArrow;
 
     private static List<ConsoleCommand> _commands = new List<ConsoleCommand>();
     private static Queue<string> _logs = new Queue<string>();
-    private string _predictedCommand;
+    private static Queue<string> _lastCommands = new Queue<string>();
+    private List<string> _predictedCommands = new List<string>();
+    private int _currentCommand = -1;
+    private int _predictedCommandIndex = -1;
+    private bool _isSearching;
 
     public bool IsConsoleOpened { get; private set; }
 
@@ -33,6 +46,8 @@ public class DeveloperConsole : MonoBehaviour
         _commands.Add(com);
     }
 
+    public void AllowPrediction(string da) => _isSearching = false;
+
     public void ToggleConsole()
     {
         consoleCanvas.gameObject.SetActive(!consoleCanvas.gameObject.activeInHierarchy);
@@ -40,6 +55,7 @@ public class DeveloperConsole : MonoBehaviour
 
         if (consoleCanvas.gameObject.activeInHierarchy)
         {
+            UpdateLogs();
             consoleInput.ActivateInputField();
         }
     }
@@ -52,49 +68,57 @@ public class DeveloperConsole : MonoBehaviour
 
     public void PredictCommand(string command)
     {
-        consolePredict.text = string.Empty;
+        if (consoleInput.text.Contains(' '))
+        {
+            _isSearching = false;
+        }
+
+        if (_isSearching)
+            return;
+
+        panels.ClearPanels();
+        _predictedCommands.Clear();
 
         if (command == "")
         {
             return;
         }
 
+        List<string> added = new List<string>();
+
         foreach (var cmd in _commands)
         {
-            if (cmd.Command.StartsWith(command))
-            {
-                if (cmd.Command.Contains(command))
-                {
-                    consolePredict.text = $"{cmd.Command} {cmd.Syntax}";
-                    _predictedCommand = cmd.Command;
-                    return;
-                }
-            }
-        }
-    }
+            // Find all commands that starts with command text
+            if (!cmd.Command.StartsWith(command))
+                continue;
 
-    private void Submit()
-    {
-        AddMessage("> " + consoleInput.text);
-        ProcessCommand(consoleInput.text);
-        consoleInput.text = string.Empty;
-        consoleInput.ActivateInputField();
+            if (added.Contains(cmd.Command))
+                continue;
+
+            added.Add(cmd.Command);
+            _predictedCommands.Add(cmd.Command);
+            panels.AddPanel(cmd.Command, cmd.Syntax);
+        }
+
+        panels.Resize();
     }
 
     private void Awake()
     {        
-        Application.logMessageReceivedThreaded += HandleLog;
         consoleInput.onValueChanged.AddListener(PredictCommand);
         consoleCanvas.gameObject.SetActive(false);
         IsConsoleOpened = false;
-        _predictedCommand = "help";
 
         UpdateLogs();
 
         _commands.Clear();
     }
 
-    private void Start() => InitializeBasicCommands();
+    private void Start()
+    {
+        InitializeBasicCommands();
+        Application.logMessageReceivedThreaded += HandleLog;
+    }
 
     private void Update()
     {
@@ -112,14 +136,17 @@ public class DeveloperConsole : MonoBehaviour
                     return;
                 }
 
+                Enqueue(_lastCommands, maxInputCommandMemory, consoleInput.text);
+
+                _currentCommand = -1;
+                _predictedCommandIndex = -1;
+                _isSearching = false;
+
                 Submit();
             }
 
-            if (Input.GetKeyDown(consolePredictConfirmKey))
-            {
-                consoleInput.text = _predictedCommand;
-                consoleInput.MoveTextEnd(false);
-            }
+            SearchInPredicted();
+            SearchInLastCommands();
         }
     }
 
@@ -166,6 +193,91 @@ public class DeveloperConsole : MonoBehaviour
         AddMessage(coloredmessage);
     }
 
+    private void SearchInPredicted()
+    {
+        if (_predictedCommands.Count == 0)
+            return;
+
+        if (Input.GetKeyDown(consoleDownKey) || Input.GetKeyDown(consoleTabKey))
+        {
+            _isSearching = true;
+            if (_predictedCommandIndex < _predictedCommands.Count - 1)
+            {
+                _predictedCommandIndex++;
+            }
+            else
+            {
+                _predictedCommandIndex = 0;
+            }
+            consoleInput.text = _predictedCommands[_predictedCommandIndex];
+            consoleInput.MoveToEndOfLine(false, false);
+        }
+
+        if (Input.GetKeyUp(consoleUpKey))
+        {
+            _isSearching = true;
+            if (_predictedCommandIndex > 0)
+            {
+                _predictedCommandIndex--;
+            }
+            else
+            {
+                _predictedCommandIndex = _predictedCommands.Count - 1;
+            }
+            consoleInput.text = _predictedCommands[_predictedCommandIndex];
+            consoleInput.MoveToEndOfLine(false, false);
+        }
+    }
+
+    private void SearchInLastCommands()
+    {
+        if (_lastCommands.Count == 0)
+            return;
+
+        if (panels.IsPredicting)
+            return;
+
+        if (Input.GetKeyDown(consoleRightKey) || Input.GetKeyDown(consoleTabKey))
+        {
+            _isSearching = true;
+            var cmmnds = _lastCommands.ToArray();
+            if (_currentCommand > 0)
+            {
+                _currentCommand--;
+            }
+            else
+            {
+                _currentCommand = _lastCommands.Count - 1;
+            }
+            consoleInput.text = cmmnds[_currentCommand];
+            consoleInput.MoveToEndOfLine(false, false);
+        }
+
+        if (Input.GetKeyDown(consoleLeftKey))
+        {
+            _isSearching = true;
+            var cmmnds = _lastCommands.ToArray();
+            if (_currentCommand < _lastCommands.Count - 1)
+            {
+                _currentCommand++;
+            }
+            else
+            {
+                _currentCommand = 0;
+            }
+            consoleInput.text = cmmnds[_currentCommand];
+            consoleInput.MoveToEndOfLine(false, false);
+        }
+    }
+
+    private void Submit()
+    {
+        AddMessage("> " + consoleInput.text);
+        ProcessCommand(consoleInput.text);
+        consoleInput.text = string.Empty;
+        consoleInput.ActivateInputField();
+    }
+
     private void ProcessCommand(string command)
     {
         if (command == "")
@@ -176,32 +288,41 @@ public class DeveloperConsole : MonoBehaviour
             if (command.StartsWith(Command.Command))
             {
                 string[] args = command.Substring(Command.Command.Length).Split(' ');
-
-                Command.Callback(args);
+                try
+                {
+                    Command.Callback(args);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError(ex.Message);
+                }
 
                 return;
             }
         }
     }
 
-    private void EnqueueLog(string message)
+    private void Enqueue(Queue<string> queue, int maxValue, string message)
     {
-        if (_logs.Count >= maxLogs)
+        if (queue.Count >= maxValue)
         {
-            _logs.Dequeue();
+            queue.Dequeue();
         }
-        _logs.Enqueue(message);
+        queue.Enqueue(message);
     }
 
     private void AddMessage(string message)
     {
-        EnqueueLog($"{message}\n");
+        Enqueue(_logs, maxLogs, $"{message}\n");
         UpdateLogs();
     }
 
     private void UpdateLogs()
     {
         if (_logs == null)
+            return;
+
+        if (!IsConsoleOpened)
             return;
 
         consoleLogs.text = string.Empty;

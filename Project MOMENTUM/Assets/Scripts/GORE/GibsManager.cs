@@ -1,26 +1,13 @@
 using System.Collections;
 using UnityEngine;
 
-public class GibsManager : MonoBehaviour
+public class GibsManager : Singleton<GibsManager>
 {
-    public static GibsManager Instance;
     [SerializeField] private GameObject[] gibs;
     [SerializeField] private int amount = 100;
     private GameObjectPool _gibsPool;
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(this);
-        }
-
-        _gibsPool = new GameObjectPool(gibs[Random.Range(0, gibs.Length - 1)], amount);
-    }
+    private void Awake() => _gibsPool = new GameObjectPool(gibs[Random.Range(0, gibs.Length - 1)], amount);
 
     public void SpawnGib(Vector3 position, float launchPower, float duration)
     {

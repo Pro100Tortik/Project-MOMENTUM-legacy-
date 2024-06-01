@@ -7,23 +7,19 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Vector2 yRotationClamp = new Vector2(-90.0f, 90.0f);
 
     [Header("References")]
+    [SerializeField] private Player player;
     [SerializeField] private Camera cam;
     [SerializeField] private Camera weaponCam;
-    [SerializeField] private SettingsSaver config;
     [SerializeField] private Transform head;
     [SerializeField] private Transform orientation;
-    private ClientStatus _status;
+    private SettingsSaver _setting;
 
     private float _yaw, _pitch;
 
-    private void Awake()
-    {
-        _status = GetComponentInParent<ClientStatus>();
-    }
-
     private void Start()
     {
-        sensitivity = config.GameSettings.Sensitivity;
+        _setting = SettingsSaver.Instance;
+        sensitivity = _setting.GameSettings.Sensitivity;
         _yaw = transform.rotation.eulerAngles.y;
         _pitch = transform.rotation.eulerAngles.x;
 
@@ -42,8 +38,10 @@ public class CameraController : MonoBehaviour
     {
         transform.position = head.position;
 
-        if (_status.CanReadInputs())
+        if (player.CanReadInputs())
         {
+            sensitivity = _setting.GameSettings.Sensitivity;
+
             MoveCamera();
         }
 

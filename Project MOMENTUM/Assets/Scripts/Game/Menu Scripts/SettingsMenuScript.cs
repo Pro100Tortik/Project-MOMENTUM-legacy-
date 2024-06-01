@@ -4,9 +4,8 @@ using UnityEngine.UI;
 
 public class SettingsMenuScript : MonoBehaviour
 {
-    [SerializeField] private SettingsSaver config;
     [SerializeField] private AudioMixer audioMixer;
-    private GameSettings settings => config.GameSettings;
+    private GameSettings settings => _settings.GameSettings;
 
     [Header("Inputs")]
     [SerializeField] private Slider sensitivity;
@@ -18,19 +17,30 @@ public class SettingsMenuScript : MonoBehaviour
     [SerializeField] private Slider masterVolume;
     [SerializeField] private Slider musicVolume;
     [SerializeField] private Slider SFXVolume;
+    private SettingsSaver _settings;
 
     private void Start()
     {
+        _settings = SettingsSaver.Instance;
+
         InitializeVariables();
+
+        DeveloperConsole.RegisterCommand("sensitivity", "<float>", "Changes mouse sensitivity.", args =>
+        {
+            if (float.TryParse(args[1], out var sens))
+                SetSensitivity(sens);
+        });
+
         //fullScreenToggle.isOn = Screen.fullScreen ? true : false;
     }
 
-    private void OnDisable()
-    {
-        config.SaveSettings();
-    }
+    private void OnDisable() => _settings.SaveSettings();
 
-    public void SetSensitivity(float value) => settings.Sensitivity = value;
+    public void SetSensitivity(float value)
+    {
+        settings.Sensitivity = value;
+        InitializeVariables();
+    }
 
     public void SetMasterVolume(float volume)
     {
@@ -42,12 +52,14 @@ public class SettingsMenuScript : MonoBehaviour
     {
         audioMixer.SetFloat("Music", volume);
         settings.MusicVolume = volume;
+        InitializeVariables();
     }
 
     public void SetSFXVolume(float volume)
     {
         audioMixer.SetFloat("SFX", volume);
         settings.SFXVolume = volume;
+        InitializeVariables();
     }
 
     public void ToggleFullScreen(bool isFullScreen) => Screen.fullScreen = isFullScreen;
