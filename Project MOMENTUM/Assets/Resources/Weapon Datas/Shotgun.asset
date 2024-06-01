@@ -12,14 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61e4456ed17468143bdd9ef2a48afb9e, type: 3}
   m_Name: Shotgun
   m_EditorClassIdentifier: 
-  safety: 0
-  canBeDualWielded: 1
-  ammoType: 2
-  damage: 3
-  range: 50
-  fireRate: 1.6
-  bulletsPerShot: 1
+  safetyLock: 0
+  primaryAmmoType: 3
+  secondaryAmmoType: 0
   pellets: 7
   spread: {x: 0.07, y: 0.05}
+  holdToShootPrimary: 1
+  primaryDamage: 4
+  primaryRange: 75
+  primaryFireRate: 1.85
+  primaryUseAmmo: 1
+  bulletsPerShotPrimary: 1
+  holdToShootSecondary: 1
+  secondaryDamage: 0
+  secondaryRange: 0
+  secondaryFireRate: 0
+  secondaryUseAmmo: 1
+  bulletsPerShotSecondary: 0
   fire1: {fileID: 8300000, guid: ef31de7abfef3f5449b973a904feabd4, type: 3}
+  fire2: {fileID: 0}
   empty: {fileID: 8300000, guid: 0e865aa9879193b42ac804a39f4bb6c5, type: 3}

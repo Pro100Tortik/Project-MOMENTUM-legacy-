@@ -276,7 +276,7 @@ PlayerSettings:
   - m_BuildTarget: 
     m_Icons:
     - serializedVersion: 2
-      m_Icon: {fileID: 2800000, guid: 50da6ab50a38fec4192dc63781125066, type: 3}
+      m_Icon: {fileID: 2800000, guid: 1698d160fa13d894a93b1735c0102132, type: 3}
       m_Width: 128
       m_Height: 128
       m_Kind: 0
@@ -804,20 +804,21 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    EmbeddedLinux: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    GameCoreScarlett: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    GameCoreXboxOne: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    LinuxHeadlessSimulation: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    PS4: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    PS5: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    QNX: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    Stadia: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    Standalone: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    WebGL: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    Windows Store Apps: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    XboxOne: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
-    tvOS: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01
+    Android: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    EmbeddedLinux: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    GameCoreScarlett: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    GameCoreXboxOne: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    LinuxHeadlessSimulation: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    Nintendo Switch: UNITY_POST_PROCESSING_STACK_V2
+    PS4: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    PS5: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    QNX: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    Stadia: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    Standalone: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    WebGL: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    Windows Store Apps: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    XboxOne: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
+    tvOS: RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_6;RealtimeCSG_1_6_01;UNITY_POST_PROCESSING_STACK_V2
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
@@ -924,7 +925,7 @@ PlayerSettings:
   hmiLogStartupTiming: 0
   hmiCpuConfiguration: 
   apiCompatibilityLevel: 6
-  activeInputHandler: 0
+  activeInputHandler: 2
   windowsGamepadBackendHint: 0
   cloudProjectId: 
   framebufferDepthMemorylessMode: 0

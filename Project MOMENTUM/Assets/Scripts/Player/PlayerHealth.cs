@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour, IDamagable
 {
@@ -9,22 +8,15 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     public event Action<AudioClip> OnPickup;
     public event Action OnDeath;
 
-    [Header("Damage Effect")]
-    [SerializeField] private RawImage damageEffect;
-    [SerializeField] private RawImage damageResistEffect;
-    [SerializeField] private float fadeSpeed = 2.5f;
 
     [SerializeField, Range(0, 200)] private float health = 100;
     [SerializeField] private int maxHealth = 100;
     [SerializeField, Range(0, 200)] private float armor = 0;
     [SerializeField] private int maxArmor = 100;
-    private float _currentDamageResistFactor;
-    private bool _isDead = false;
-    private bool _godMode = false;
-    private ArmorType _currentArmorType;
+    [SerializeField] private bool godMode = false;
 
     [Header("Sounds")]
-    [SerializeField] private float painTimerCooldown = 0.5f;
+    //[SerializeField] private float painTimerCooldown = 0.5f;
     [SerializeField] private AudioClip powerupArmor;
     [SerializeField] private AudioClip powerupHealth;
     [SerializeField] private AudioClip powerupDamageResist;
@@ -34,23 +26,22 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
     private float _damageResistTimer;
     private float _painTimer;
+    private float _currentDamageResistFactor;
+    private bool _isDead = false;
+    private ArmorType _currentArmorType;
+    private UIManager _UIManager;
 
     public float Health => health;
     public float Armor => armor;
     public ArmorType GetCurrentArmorType() => _currentArmorType;
 
-    private void Awake()
-    {
-        damageEffect.color = new Color(1, 0, 0, 0);
-        damageResistEffect.color = new Color(0, 1, 0, 0);
-    }
-
     private void Start()
     {
         DeveloperConsole.RegisterCommand("god", "", "Make player ignore all damage.", args =>
         {
-            _godMode = !_godMode;
+            godMode = !godMode;
         });
+        _UIManager = UIManager.Instance;
     }
 
     private void Update()
@@ -68,18 +59,6 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
     private void FixedUpdate()
     {
-        damageEffect.color = Color.Lerp(damageEffect.color, new Color(1, 0, 0, 0), Time.deltaTime * fadeSpeed);
-
-        if (_damageResistTimer > 0)
-            _damageResistTimer -= Time.deltaTime;
-        else
-            _damageResistTimer = 0;
-
-        if (_damageResistTimer < 3)
-        {
-            damageResistEffect.color = Color.Lerp(damageResistEffect.color, new Color(0, 1, 0, 0), Time.deltaTime);
-        }
-
         if (_painTimer > 0)
             _painTimer -= Time.deltaTime;
         else
@@ -90,18 +69,13 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     {
         if (_isDead) return;
 
-        if (_godMode)
+        if (godMode)
             return;
-
-        //if (status.GodMode)
-        //    return;
 
         PainSoundTrigger();
 
         if (_damageResistTimer > 0)
-        {
             return;
-        }
 
         DamageLogic(damage);
     }
@@ -110,9 +84,9 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     {
         if (_painTimer <= 0)
         {
-            _painTimer = painTimerCooldown;
-            damageEffect.color = new Color(1, 0, 0, 0.4f);
-            OnDamage?.Invoke(painSounds[UnityEngine.Random.Range(0, painSounds.Count - 1)]);
+            _painTimer = 0.1f;
+            _UIManager.damageEffect.color = new Color(1, 0, 0, 0.4f);
+            OnDamage?.Invoke(painSounds.GetRandomElement());
         }
     }
 
@@ -154,7 +128,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
             return 0.33f;
     }
 
-    private bool RestoreHealth(int restoreValue, bool clamp)
+    public bool RestoreHealth(int restoreValue, bool clamp)
     {
         if (clamp)
         {
@@ -265,7 +239,6 @@ public class PlayerHealth : MonoBehaviour, IDamagable
             if (powerup.GetPowerupType == PowerupType.DamageResist)
             {
                 _damageResistTimer += 30.0f;
-                damageResistEffect.color = new Color(0, 1, 0, 0.3f);
                 other.gameObject.SetActive(false);
                 OnPickup?.Invoke(powerupDamageResist);
             }

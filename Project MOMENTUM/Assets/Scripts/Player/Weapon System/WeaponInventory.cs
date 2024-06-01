@@ -2,23 +2,27 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WeaponInventory : MonoBehaviour, ISaveable
+public class WeaponInventory : MonoBehaviour
 {
     public event Action<AudioClip> OnWeaponAdded;
-    public event Action<WeaponDataSO> OnWeaponPickedUp;
-    public event Action<WeaponDataSO> OnSecondWeaponPickedUp;
 
+    [SerializeField] private Player player;
+
+    [Header("Weapon Inventory")]
     [SerializeField] private bool startWithPistol = true;
     [SerializeField] private List<WeaponDataSO> weaponList;
-    [SerializeField] private List<WeaponDataSO> secondWeaponList;
     [SerializeField] private AudioClip pickupSound;
-    private ClientStatus _status;
     private bool _pickedUp;
+
+    [Header("Weapon Switching")]
+    [SerializeField] private List<GameObject> weapons;
+    [SerializeField] private int startWeapon;
+
+    private int _currentWeapon = 0;
+    private int _lastWeapon;
 
     private void Awake()
     {
-        _status = GetComponentInParent<ClientStatus>();
-
         if (startWithPistol)
         {
             StartWithPistol();
@@ -31,62 +35,12 @@ public class WeaponInventory : MonoBehaviour, ISaveable
         {
             AddAllWeapons();
         });
+
+        DisableWeapons();
+        SwitchWeapon(startWeapon);
     }
 
-    public void AddWeapon(WeaponDataSO weapon, bool playSound = true)
-    {
-        if (!HaveWeapon(weapon))
-        {
-            weaponList.Add(weapon);
-            OnWeaponPickedUp?.Invoke(weapon);
-
-            if (playSound)
-                OnWeaponAdded?.Invoke(pickupSound);
-
-            _pickedUp = true;
-        }
-        else
-        {
-            AddSecondWeapon(weapon);
-        }
-    }
-
-    public bool HaveWeapon(WeaponDataSO weapon)
-    {
-        if (weapon == null)
-            return true;
-
-        return weaponList.Contains(weapon);
-    }
-
-    public void AddSecondWeapon(WeaponDataSO weapon, bool playSound = true)
-    {
-        if (HaveSecondWeapon(weapon))
-            return;
-
-        secondWeaponList.Add(weapon);
-
-        if (playSound)
-            OnWeaponAdded?.Invoke(pickupSound);
-
-        OnSecondWeaponPickedUp?.Invoke(weapon);
-        _pickedUp = true;
-    }
-
-    public bool HaveSecondWeapon(WeaponDataSO weapon)
-    {
-        if (weapon == null)
-            return true;
-
-        return secondWeaponList.Contains(weapon);
-    }
-
-    private void StartWithPistol()
-    {
-        WeaponDataSO pistol = Resources.Load<WeaponDataSO>("Weapon Datas/Pistol");
-        AddWeapon(pistol, false);
-    }
-
+    #region Weapon Inventory
     private void AddAllWeapons()
     {
         var weaponDatas = Resources.LoadAll<WeaponDataSO>("Weapon Datas");
@@ -100,13 +54,124 @@ public class WeaponInventory : MonoBehaviour, ISaveable
         foreach (var weapon in weaponDatas)
         {
             AddWeapon(weapon);
-            AddSecondWeapon(weapon);
+        }
+    }
+
+    public void AddWeapon(WeaponDataSO weapon, bool playSound = true)
+    {
+        if (!HaveWeapon(weapon))
+        {
+            weaponList.Add(weapon);
+            ChangeOnPickup(weapon);
+
+            if (playSound)
+                OnWeaponAdded?.Invoke(pickupSound);
+
+            _pickedUp = true;
+        }
+    }
+
+    public bool HaveWeapon(WeaponDataSO weapon)
+    {
+        if (weapon == null)
+            return true;
+
+        return weaponList.Contains(weapon);
+    }
+    #endregion
+
+    private void StartWithPistol()
+    {
+        WeaponDataSO pistol = Resources.Load<WeaponDataSO>("Weapon Datas/Pistol");
+        AddWeapon(pistol, false);
+    }
+
+    private void Update()
+    {
+        if (player.IsDead)
+        {
+            DisableWeapons();
+            return;
+        }
+
+        if (!player.CanReadInputs())
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            SwitchWeapon(0);
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            SwitchWeapon(1);
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+            SwitchWeapon(2);
+
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+            SwitchWeapon(3);
+
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+            SwitchWeapon(4);
+
+        if (Input.GetKeyDown(KeyCode.Alpha6))
+            SwitchWeapon(5);
+
+        if (Input.GetKeyDown(KeyCode.Q))
+            SwitchWeapon(_lastWeapon);
+    }
+
+    private void SwitchWeapon(int weaponIndex)
+    {
+        if (weaponIndex < 0 || weaponIndex > weapons.Count - 1)
+            return;
+
+        if (!HaveWeapon(GetWeaponData(weaponIndex)))
+            return;
+
+        _lastWeapon = _currentWeapon;
+        _currentWeapon = weaponIndex;
+
+        DisableWeapons();
+        EnableWeapon(_currentWeapon);
+    }
+
+    private void DisableWeapons()
+    {
+        foreach (var weapon in weapons)
+        {
+            if (weapon != null)
+                weapon.SetActive(false);
+        }
+    }
+
+    private void EnableWeapon(int index) => weapons[index].SetActive(true);
+
+    public WeaponDataSO GetCurrentWeaponData() => GetWeaponData(_currentWeapon);
+
+    private WeaponDataSO GetWeaponData(int index)
+    {
+        if (index > weapons.Count) return null;
+
+        var weapon = weapons[index].GetComponent<WeaponAbstract>();
+        var data = weapon != null ? weapon.WeaponData() : null;
+        return data;
+    }
+
+    private void ChangeOnPickup(WeaponDataSO weapon)
+    {
+        for (int i = 0; i < weapons.Count; i++)
+        {
+            if (GetWeaponData(i) == weapon)
+            {
+                DisableWeapons();
+                EnableWeapon(i);
+                return;
+            }
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!_status.CanReadInputs()) return;
+        if (!player.CanReadInputs()) return;
 
         WeaponPickup weapon = other.GetComponent<WeaponPickup>();
         if (weapon)
@@ -118,17 +183,5 @@ public class WeaponInventory : MonoBehaviour, ISaveable
                 _pickedUp = false;
             }
         }
-    }
-
-    public void LoadData(GameData data)
-    {
-        weaponList = data.playerData.weapons;
-        secondWeaponList = data.playerData.secondWeapons;
-    }
-
-    public void SaveData(GameData data)
-    {
-        data.playerData.weapons = weaponList;
-        data.playerData.secondWeapons = secondWeaponList;
     }
 }

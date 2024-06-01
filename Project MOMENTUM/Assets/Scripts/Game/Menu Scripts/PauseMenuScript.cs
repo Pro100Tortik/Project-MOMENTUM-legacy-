@@ -2,10 +2,9 @@ using UnityEngine;
 
 public class PauseMenuScript : MonoBehaviour
 {
+    [SerializeField] private UIManager UIManager;
     [SerializeField] private bool pressed = false;
-    private ClientStatus _status;
-
-    private void Awake() => _status = GetComponentInParent<ClientStatus>();
+    private Player _player;
 
     //public void ContinueGame() => _status.ContinueGame();
 
@@ -15,6 +14,7 @@ public class PauseMenuScript : MonoBehaviour
             return;
 
         pressed = true;
+        GameManager.Instance.SetTimescale(1.0f, true);
         GameFunctions.RestartLevel();
     }
 

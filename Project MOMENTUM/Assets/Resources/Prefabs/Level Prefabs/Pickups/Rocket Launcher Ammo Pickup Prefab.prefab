@@ -68,7 +68,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03cf3c1febde9ca439a73097cd2dd008, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ammoType: 3
+  ammoType: 4
   ammoAmount: 5
 --- !u!114 &2767159646278307191
 MonoBehaviour:
@@ -83,7 +83,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   multiplayerOnly: 0
-  spawnDifficulties: 1
+  spawnDifficulties: -1
 --- !u!1 &8829021405515417259
 GameObject:
   m_ObjectHideFlags: 0

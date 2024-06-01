@@ -82,7 +82,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   multiplayerOnly: 0
-  spawnDifficulties: 1
+  spawnDifficulties: -1
 --- !u!1 &7998853520171970450
 GameObject:
   m_ObjectHideFlags: 0

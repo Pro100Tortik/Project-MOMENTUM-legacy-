@@ -83,7 +83,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   multiplayerOnly: 0
-  spawnDifficulties: 1
+  spawnDifficulties: -1
 --- !u!114 &6912780670761380763
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119,7 +119,7 @@ PrefabInstance:
     - target: {fileID: 694197690955465662, guid: 72e6085d952ba654489e6fac59492bdc,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 694197690955465662, guid: 72e6085d952ba654489e6fac59492bdc,
         type: 3}
@@ -129,22 +129,22 @@ PrefabInstance:
     - target: {fileID: 694197690955465662, guid: 72e6085d952ba654489e6fac59492bdc,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.70710784
       objectReference: {fileID: 0}
     - target: {fileID: 694197690955465662, guid: 72e6085d952ba654489e6fac59492bdc,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 694197690955465662, guid: 72e6085d952ba654489e6fac59492bdc,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 694197690955465662, guid: 72e6085d952ba654489e6fac59492bdc,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: 0.70710576
       objectReference: {fileID: 0}
     - target: {fileID: 694197690955465662, guid: 72e6085d952ba654489e6fac59492bdc,
         type: 3}
@@ -159,7 +159,7 @@ PrefabInstance:
     - target: {fileID: 694197690955465662, guid: 72e6085d952ba654489e6fac59492bdc,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 1040359984964376834, guid: 72e6085d952ba654489e6fac59492bdc,
         type: 3}

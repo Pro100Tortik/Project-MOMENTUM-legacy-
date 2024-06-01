@@ -12,14 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61e4456ed17468143bdd9ef2a48afb9e, type: 3}
   m_Name: Rifle
   m_EditorClassIdentifier: 
-  safety: 0
-  canBeDualWielded: 0
-  ammoType: 1
-  damage: 40
-  range: 200
-  fireRate: 1.5
-  bulletsPerShot: 1
+  safetyLock: 0
+  primaryAmmoType: 2
+  secondaryAmmoType: 0
   pellets: 1
   spread: {x: 0, y: 0}
+  holdToShootPrimary: 1
+  primaryDamage: 30
+  primaryRange: 200
+  primaryFireRate: 1
+  primaryUseAmmo: 1
+  bulletsPerShotPrimary: 1
+  holdToShootSecondary: 1
+  secondaryDamage: 0
+  secondaryRange: 0
+  secondaryFireRate: 0
+  secondaryUseAmmo: 1
+  bulletsPerShotSecondary: 0
   fire1: {fileID: 8300000, guid: 8622a00b233f17c49a7f2b84784cc0fe, type: 3}
+  fire2: {fileID: 0}
   empty: {fileID: 8300000, guid: 8a10aadec9523ad4cafee1ba33157ee4, type: 3}

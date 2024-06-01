@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-public class SettingsSaver : MonoBehaviour
+public class SettingsSaver : Singleton<SettingsSaver>
 {
     [SerializeField] private bool IsBuild = true;
     [SerializeField] private GameSettings settings;
@@ -61,8 +61,5 @@ public class SettingsSaver : MonoBehaviour
     [ContextMenu("Reset Settings")]
     public void ResetSettings() => CreateGameSettings();
 
-    private void OnApplicationQuit()
-    {
-        SaveSettings();
-    }
+    private void OnApplicationQuit() => SaveSettings();
 }

@@ -165,4 +165,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   multiplayerOnly: 0
-  spawnDifficulties: 1
+  spawnDifficulties: -1

@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b7976b72e2a10c3468961054d8b6e15e, type: 2}
+  - {fileID: 2100000, guid: 1e89e2cf8aa27c24289ca11fd6961f19, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -139,7 +139,7 @@ Transform:
   m_Children:
   - {fileID: 215104960700495982}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &4644204179943136894
 BoxCollider:
@@ -201,5 +201,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03cf3c1febde9ca439a73097cd2dd008, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ammoType: 1
-  ammoAmount: 20
+  ammoType: 2
+  ammoAmount: 5

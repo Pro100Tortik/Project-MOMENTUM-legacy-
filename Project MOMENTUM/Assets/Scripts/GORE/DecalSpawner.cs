@@ -15,6 +15,7 @@ public class DecalSpawner : MonoBehaviour
 
         GameObject decalObj = Instantiate(decal, collision.contacts[0].point + collision.contacts[0].normal * 0.01f, 
             Quaternion.FromToRotation(Vector3.back, collision.contacts[0].normal));
+
         Destroy(decalObj, existTime);
     }
 }

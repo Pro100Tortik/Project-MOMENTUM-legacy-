@@ -18,7 +18,7 @@ TagManager:
   - Level
   - Water
   - UI
-  - Weapon
+  - View Model
   - Player
   - Triggers
   - GIBS
@@ -28,7 +28,7 @@ TagManager:
   - Hitbox
   - ShootThrough
   - Transparent
-  - 
+  - Enemy
   - 
   - 
   - 

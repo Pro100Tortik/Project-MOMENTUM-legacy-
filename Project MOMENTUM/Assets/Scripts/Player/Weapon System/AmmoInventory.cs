@@ -2,32 +2,15 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum AmmoType
-{
-    None,
-    Bullets,
-    Shells,
-    Rockets
-}
-
-[Serializable]
-public struct WeaponAmmo
-{
-    [HideInInspector] public string ammoName;
-    public int ammo;
-    public int maxAmmo;
-}
-
 public class AmmoInventory : MonoBehaviour, ISaveable
 {
     public event Action<AudioClip> OnAmmoPickedUp;
-    public bool InfiniteAmmo { get; private set; } = false;
+    public bool InfiniteAmmo => infiniteAmmo;
+    [SerializeField] private bool infiniteAmmo = false;
+    [SerializeField] private Player player;
     [SerializeField] private List<WeaponAmmo> ammoList;
     [SerializeField] private AudioClip pickupSound;
-    private ClientStatus _status;
     private bool _pickedUp;
-
-    private void Awake() => _status = GetComponentInParent<ClientStatus>();
 
     private void Start()
     {
@@ -38,7 +21,7 @@ public class AmmoInventory : MonoBehaviour, ISaveable
 
         DeveloperConsole.RegisterCommand("infiniteammo", "", "Weapon do not use any ammo.", args =>
         {
-            InfiniteAmmo = !InfiniteAmmo;
+            infiniteAmmo = !infiniteAmmo;
         });
     }
 
@@ -102,7 +85,7 @@ public class AmmoInventory : MonoBehaviour, ISaveable
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!_status.CanReadInputs()) return;
+        if (!player.CanReadInputs()) return;
 
         AmmoPickup ammo = other.GetComponent<AmmoPickup>();
         if (ammo)

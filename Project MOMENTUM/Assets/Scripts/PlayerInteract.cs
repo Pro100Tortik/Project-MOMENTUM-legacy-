@@ -2,22 +2,17 @@ using UnityEngine;
 
 public class PlayerInteract : MonoBehaviour
 {
+    [SerializeField] private Player player;
     [SerializeField] private float interactionRange = 3.0f;
     [SerializeField] private float interactionCheckRadius = 0.2f;
     [SerializeField] private LayerMask interactableLayer;
     private Transform _playerCamera;
-    private ClientStatus _status;
 
-    private void Awake()
-    {
-        _playerCamera = transform;
-        _status = GetComponentInParent<ClientStatus>();
-    }
-
+    private void Awake() => _playerCamera = transform;
 
     private void Update()
     {
-        if (!_status.CanReadInputs())
+        if (!player.CanReadInputs())
         {
             return;
         }

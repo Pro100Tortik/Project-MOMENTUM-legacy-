@@ -18,12 +18,15 @@ public class PlayerController : MonoBehaviour
     public event Action<AudioClip> OnJump;
     public event Action OnSecretFound;
 
-    [SerializeField] private bool AutoJump;
+    [SerializeField] private Transform model;
+
+    [SerializeField] private Player player;
     [SerializeField] private Transform cam;
     [SerializeField] private Transform head;
     [SerializeField] private Transform orientation;
     [SerializeField] private MoveType moveType;
     [SerializeField] private LayerMask crouchCheckLayers;
+    [SerializeField] private LayerMask stepMask;
 
     [Header("Sounds")]
     [SerializeField] private AudioClip[] stepSounds;
@@ -31,58 +34,65 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip[] waterSounds;
     [SerializeField] private AudioClip[] swimSounds;
     [SerializeField] private AudioClip jumpSound;
-
     [SerializeField] private MovementCvars cvars;
 
-    #region Private Variables
+    #region Dynamic Vars
     private float _inputForward;
     private float _inputRight;
 
-    private float _waterDepth;
-    private float _friction;
     private float _currentAccel;
+    #endregion
+
+    private float _waterDepth;
     private float _stepTimer;
     private float _ladderTimer;
     private float _waterTimer;
     private float _swimTimer;
     private float _jumpTimer;
     private float _skipFrictionTimer;
+    private float _slideTimer;
 
-    private bool _isInWater;
     private bool _wishJump;
+    private bool _isCrouching;
+    private bool _autoJump;
+    private bool _isInWater;
     private bool _isGrounded;
     private bool _onLadder;
-    private bool _isCrouching;
     private bool _wasCrouching;
+    private bool _isSliding;
     private bool _died = false;
+    private bool _isOnSlope;
     //private bool _wasInWater;
 
     private Rigidbody _rb;
-    private CapsuleCollider _collider;
+    private BoxCollider _collider;
 
+    private Vector3 _crouchHeadPos;
+    private Vector3 _standingHeadPos;
+    private Vector3 _currentHeadPos;
     private Vector3 _groundNormal;
     private Vector3 _ladderNormal;
     private Vector3 _moveDir;
     private Vector3 _vel;
 
-    private ClientStatus _status;
     private Collider _water;
-    #endregion
 
     public bool OnGround => _isGrounded && !Input.GetKey(KeyCode.Space);
 
-    public Vector3 PlayerVelocity => _rb.velocity;
+    public bool IsSliding => _isGrounded && _isSliding;
+
+    public Vector3 Velocity => _rb.velocity;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
         _rb.freezeRotation = true;
 
-        _status = GetComponentInParent<ClientStatus>();
+        TryGetComponent<BoxCollider>(out _collider);
 
-        _friction = cvars.groundFriction;
-
-        TryGetComponent<CapsuleCollider>(out _collider);
+        _standingHeadPos = head.localPosition;
+        _currentHeadPos = _standingHeadPos;
+        _crouchHeadPos = new Vector3(_standingHeadPos.x, _standingHeadPos.y - cvars.crouchHeight * 0.5f, _standingHeadPos.z);
     }
 
     private void Start()
@@ -94,7 +104,7 @@ public class PlayerController : MonoBehaviour
 
         DeveloperConsole.RegisterCommand("bhop", "", "Allow player hold space for autojump.", args =>
         {
-            AutoJump = !AutoJump;
+            _autoJump = !_autoJump;
         });
     }
 
@@ -107,58 +117,48 @@ public class PlayerController : MonoBehaviour
 
         GetMoveDir();
 
-        _inputForward = _status.CanReadInputs() ? Input.GetAxisRaw("Vertical") : 0;
-        _inputRight = _status.CanReadInputs() ? Input.GetAxisRaw("Horizontal") : 0;
+        _inputForward = player.CanReadInputs() ? Input.GetAxisRaw("Vertical") : 0;
+        _inputRight = player.CanReadInputs() ? Input.GetAxisRaw("Horizontal") : 0;
 
-        if (!_status.CanReadInputs() || _status.IsDead)
+        if (!player.CanReadInputs() || player.IsDead)
             return;
 
         JumpQueue();
 
-        _currentAccel = cvars.acceleration * (Input.GetKey(KeyCode.LeftShift) ? cvars.shiftMultiplier : 1);
+        if (!_isSliding && !_wasCrouching)
+            _currentAccel = cvars.acceleration * (Input.GetKey(KeyCode.LeftShift) ? cvars.shiftMultiplier : 1);
 
         _isCrouching = Input.GetKey(KeyCode.LeftControl);
     }
 
     private void FixedUpdate()
     {
+        if (player.IsDead)
+        {
+            if (!_died)
+                Die();
+        }
+
         Movement();
         ResetJump();
         SkipFriction();
-
-        //if (!status.Noclip)
-        //{
-        //    moveType = MoveType.Walk;
-        //    return;
-        //}
-
-        //if (moveType != MoveType.Noclip)
-        //    moveType = MoveType.Noclip;
     }
 
     private void Die()
     {
         _died = true;
-        head.localPosition = Vector3.up * -0.2f;
-        _collider.height = 0.2f;
+        head.localPosition = _crouchHeadPos;
+        _collider.size = new Vector3(_collider.size.x, 0.2f, _collider.size.z);
+        model.localScale = new Vector3(model.localScale.x, 0.2f, model.localScale.z);
     }
 
-    private void GetMoveDir() => _moveDir = orientation.localRotation 
-        * new Vector3(_inputRight, 0, _inputForward).normalized;
+    private void GetMoveDir() => _moveDir = orientation.localRotation * new Vector3(_inputRight, 0, _inputForward).normalized;
 
     private void Movement()
     {
-        if (_status.IsDead)
-        {
-            if (!_died)
-            {
-                Die();
-            }
-        }
+        _vel = _rb.velocity;
 
         Crouch();
-
-        _vel = _rb.velocity;
 
         if (moveType != MoveType.Noclip)
         {
@@ -180,6 +180,7 @@ public class PlayerController : MonoBehaviour
         {
             case MoveType.Walk:
                 FullWalkMove();
+                //DetectStep();
                 break;
 
             case MoveType.Ladder:
@@ -201,23 +202,61 @@ public class PlayerController : MonoBehaviour
         _ladderNormal = Vector3.zero;
         _isGrounded = false;
         _onLadder = false;
+        _isOnSlope = false;
+    }
+
+    private void DetectStep()
+    {
+        if (!_isGrounded)
+            return;
+
+        if (_wishJump)
+            return;
+
+        if (_vel.magnitude <= 0.2f)
+            return;
+
+        var extents = _collider.bounds.extents * 1.01f;
+        extents.y = 0.15f;
+        var nextPos = _rb.position + _vel * Time.deltaTime;
+        var center = nextPos + new Vector3(0, _collider.bounds.size.y - extents.y, 0);
+        var distance = 10f;
+
+        if (Physics.BoxCast(center: center, halfExtents: extents, direction: Vector3.down,
+            orientation: orientation.localRotation, maxDistance: distance, layerMask: stepMask,
+            queryTriggerInteraction: QueryTriggerInteraction.Ignore, hitInfo: out RaycastHit hit))
+        {
+            if (!hit.collider.enabled || hit.point == Vector3.zero || hit.normal.y <= cvars.slopeLimit * Mathf.Deg2Rad)
+            {
+                return;
+            }
+
+            float magicNumber = _collider.size.y * 0.5f + 0.1f;
+            var stepHeight = Mathf.Abs(hit.point.y - (_rb.position.y - magicNumber));
+
+            //if (_rb.position.y > hit.point.y)
+            //{
+            //    stepHeight -= 2;
+            //}
+
+            if (stepHeight <= cvars.stepHeight)
+            {
+                _rb.position += Vector3.up * stepHeight;
+            }
+        }
     }
 
     private void SkipFriction()
     {
         if (_skipFrictionTimer > 0)
-        {
             _skipFrictionTimer -= Time.deltaTime;
-        }
         else
-        {
             _skipFrictionTimer = 0;
-        }
     }
 
     private void GroundMove()
     {
-        if (!_status.CanReadInputs() || _status.IsDead)
+        if (!player.CanReadInputs() || player.IsDead)
             return;
 
         if (_wishJump)
@@ -227,13 +266,13 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        _moveDir = Vector3.Cross(Vector3.Cross(_groundNormal, _moveDir), _groundNormal);
+        _moveDir = GetSlopeMoveDir(_moveDir);
         _vel += BhopPhysics.GroundAccelerate(_vel, _moveDir, cvars.groundSpeed, _currentAccel);
     }
 
     private void AirMove()
     {
-        if (!_status.CanReadInputs() || _status.IsDead)
+        if (!player.CanReadInputs() || player.IsDead)
             return;
 
         _vel += BhopPhysics.AirAccelerate(_vel, _moveDir,
@@ -244,11 +283,16 @@ public class PlayerController : MonoBehaviour
     {
         if (_isGrounded)
         {
+            if (_isSliding)
+            {
+                SlideMovement();
+            }
+
             if (_skipFrictionTimer > 0)
                 return;
 
-            _rb.drag = _friction;
-            _rb.useGravity = false;
+            _rb.drag = _isSliding ? cvars.slideFriction : cvars.groundFriction;
+            _rb.useGravity = _isSliding;
 
             GroundMove();
         }
@@ -284,10 +328,8 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            if (_status.CanReadInputs() && !_status.IsDead)
-            {
+            if (player.CanReadInputs() && !player.IsDead)
                 _moveDir = cam.forward * Input.GetAxisRaw("Vertical") + cam.right * Input.GetAxisRaw("Horizontal");
-            }
 
             Vector3 speed = _moveDir.normalized * cvars.climbingSpeed;
 
@@ -323,9 +365,11 @@ public class PlayerController : MonoBehaviour
             if (_water.bounds.Contains(headPoint))
             {
                 _waterDepth = 1.0f;
+                RenderSettings.fog = true;
             }
             else
             {
+                RenderSettings.fog = false;
                 Vector3 closestPoint = _water.ClosestPoint(headPoint);
                 float dist = Vector3.Distance(headPoint, closestPoint);
                 _waterDepth = Mathf.Max(0.1f, head.localPosition.y + 0.5f - dist / head.localPosition.y);
@@ -352,12 +396,12 @@ public class PlayerController : MonoBehaviour
         wishvel.Normalize();
         wishvel *= cvars.waterSpeed;
 
-        if (!_status.CanReadInputs() || (_inputForward == 0 && _inputRight == 0))
+        if (!player.CanReadInputs() || (_inputForward == 0 && _inputRight == 0))
         {
             _vel.y -= cvars.sinkSpeed;
         }
 
-        if (_status.CanReadInputs() && !_status.IsDead)
+        if (player.CanReadInputs() && !player.IsDead)
         {
             if (_wishJump)
             {
@@ -379,12 +423,6 @@ public class PlayerController : MonoBehaviour
 
             wishdir = wishvel;
             wishspeed = wishdir.magnitude;
-
-            //if (wishspeed > cvars.waterSpeed)
-            //{
-            //    wishvel *= cvars.maxSpeed / cvars.waterSpeed;
-            //    wishspeed = cvars.maxSpeed;
-            //}
 
             wishspeed *= 0.7f;
 
@@ -416,7 +454,7 @@ public class PlayerController : MonoBehaviour
                     }
 
                     Vector3 deltaSpeed = accelspeed * wishvel;
-                    if (_status.CanReadInputs())
+                    if (player.CanReadInputs())
                         _vel += deltaSpeed;
                 }
             }
@@ -432,32 +470,27 @@ public class PlayerController : MonoBehaviour
         _moveDir = cam.forward * _inputForward + cam.right * _inputRight;
 
         _vel += BhopPhysics.GroundAccelerate(_vel, _moveDir, cvars.noclipSpeed, _currentAccel);
+
         _rb.velocity = _vel;
     }
 
     private void JumpQueue()
     {
-        if (!_status.CanReadInputs())
+        if (!player.CanReadInputs())
         {
             _wishJump = false;
             return;
         }
 
-        if (AutoJump)
+        if (_autoJump)
         {
             _wishJump = Input.GetKey(KeyCode.Space);
             return;
         }
         else
         {
-            if (Input.GetKeyDown(KeyCode.Space) && !_wishJump)
-            {
-                _wishJump = true;
-            }
-            else if (Input.GetKeyUp(KeyCode.Space))
-            {
-                _wishJump = false;
-            }
+            if (Input.GetKeyDown(KeyCode.Space) && !_wishJump) _wishJump = true;
+            else if (Input.GetKeyUp(KeyCode.Space)) _wishJump = false;
         }
     }
 
@@ -478,31 +511,89 @@ public class PlayerController : MonoBehaviour
         if (_died)
             return;
 
-        if (_isCrouching)
+        head.localPosition = Vector3.Lerp(head.localPosition, _currentHeadPos, Time.deltaTime / 0.2f);
+
+        if (_isCrouching && !_wasCrouching)
         {
-            head.localPosition = Vector3.up * 0.25f; // crouch
-            _collider.height = cvars.crouchHeight;
+            _currentHeadPos = _crouchHeadPos;
+
+            if (_isGrounded)
+                transform.position -= Vector3.up * 0.45f;
+
+            model.localScale = new Vector3(model.localScale.x, cvars.crouchHeight * 0.5f, model.localScale.z);
+            _collider.size = new Vector3(_collider.size.x, cvars.crouchHeight, _collider.size.z);
+
+            StartSlide();
+
             _wasCrouching = true;
         }
-        else if (CanUncrouch() && !_isCrouching)
+        else if (CanUncrouch() && !_isCrouching && _wasCrouching)
         {
-            head.localPosition = Vector3.up * 0.75f;
-            _collider.height = cvars.playerHeight;
+            _currentHeadPos = _standingHeadPos;
+
+            if (_isGrounded)
+                transform.position += Vector3.up * 0.45f;
+
+            model.localScale = new Vector3(model.localScale.x, cvars.playerHeight * 0.5f, model.localScale.z);
+            _collider.size = new Vector3(_collider.size.x, cvars.playerHeight, _collider.size.z);
+            StopSlide();
+
             _wasCrouching = false;
         }
 
         if (_wasCrouching)
-            _currentAccel *= cvars.duckMultiplier;
+            _currentAccel = cvars.acceleration * cvars.duckMultiplier;
     }
 
-    private bool CanUncrouch()
+    private void StartSlide()
     {
-        if (moveType == MoveType.Noclip)
-            return true;
+        if (!CanSlide() || (!_isGrounded && Mathf.Abs(_vel.y) < cvars.velocityToStop))
+            return;
 
-        return !Physics.CheckSphere(head.position + 
-            Vector3.up * cvars.checkHeight, cvars.checkRadius, crouchCheckLayers);
+        if (_isGrounded)
+        {
+            _vel += _vel.OnlyXZ().normalized * _currentAccel * cvars.slideMultiplier;
+        }
+
+        _isSliding = true;
+
+        _slideTimer = cvars.slideTime;
     }
+
+    private void StopSlide()
+    {
+        _isSliding = false;
+    }
+
+    private void OnGUI()
+    {
+        GUIStyle style = new GUIStyle();
+        style.alignment = TextAnchor.LowerCenter;
+        style.fontSize = 40;
+        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), _vel.magnitude.ToString("0.0"), style);
+    }
+
+    private void SlideMovement()
+    {
+        // Cannot gain speed if moving upwards without slope
+        if (!_isOnSlope || _rb.velocity.y > -0.1f)
+        {
+            _slideTimer -= Time.deltaTime;
+        }
+        else
+        {
+            _vel += GetSlopeMoveDir(_vel) * _currentAccel * cvars.slideMultiplier;
+            _slideTimer = cvars.slideTime;
+        }
+
+        if (_vel.OnlyXZ().magnitude < cvars.velocityToStop || _slideTimer <= 0)
+            StopSlide();
+    }
+
+    private bool CanSlide() => _vel.magnitude >= cvars.velocityToStart;
+
+    private bool CanUncrouch() => moveType == MoveType.Noclip ? true : 
+        !Physics.CheckSphere(transform.position + Vector3.up * cvars.checkHeight, cvars.checkRadius, crouchCheckLayers);
 
     private void ResetJump()
     {
@@ -528,7 +619,7 @@ public class PlayerController : MonoBehaviour
 
         if (Time.time > _stepTimer)
         {
-            OnStep?.Invoke(stepSounds[UnityEngine.Random.Range(0, stepSounds.Length)]);
+            OnStep?.Invoke(stepSounds.GetRandomElement());
 
             _stepTimer = Time.time + 1f / 2.5f;
         }
@@ -547,7 +638,7 @@ public class PlayerController : MonoBehaviour
 
         if (Time.time > _waterTimer)
         {
-            OnStep?.Invoke(waterSounds[UnityEngine.Random.Range(0, waterSounds.Length)]);
+            OnStep?.Invoke(waterSounds.GetRandomElement());
             _waterTimer = Time.time + 1f / (_wasCrouching ? 1.5f : Input.GetKey(KeyCode.LeftShift) ? 1.9f : 2.5f);
         }
     }
@@ -565,7 +656,7 @@ public class PlayerController : MonoBehaviour
 
         if (Time.time > _swimTimer)
         {
-            OnStep?.Invoke(swimSounds[UnityEngine.Random.Range(0, swimSounds.Length)]);
+            OnStep?.Invoke(swimSounds.GetRandomElement());
             _swimTimer = Time.time + 1f / 1.9f;
         }
     }
@@ -583,10 +674,12 @@ public class PlayerController : MonoBehaviour
 
         if (Time.time > _ladderTimer)
         {
-            OnLadderMove?.Invoke(ladderSounds[UnityEngine.Random.Range(0, ladderSounds.Length)]);
+            OnLadderMove?.Invoke(ladderSounds.GetRandomElement());
             _ladderTimer = Time.time + 1f / Mathf.Min(Mathf.Max(_vel.magnitude, 1.5f), 2.5f);
         }
     }
+
+    private Vector3 GetSlopeMoveDir(Vector3 dir) => Vector3.ProjectOnPlane(dir, _groundNormal).normalized;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -630,8 +723,9 @@ public class PlayerController : MonoBehaviour
 
         foreach (ContactPoint cp in collision.contacts)
         {
-            if (collision.transform.CompareTag("Ladder") &&
-                cp.normal.y < Mathf.Sin(cvars.slopeLimit * Mathf.Deg2Rad))
+            float angle = Vector3.Angle(Vector3.up, cp.normal);
+
+            if (collision.transform.CompareTag("Ladder") && angle > cvars.slopeLimit)
             {
                 _ladderNormal = cp.normal;
                 _onLadder = true;
@@ -639,7 +733,9 @@ public class PlayerController : MonoBehaviour
                 return;
             }
 
-            if (cp.normal.y > Mathf.Sin(cvars.slopeLimit * Mathf.Deg2Rad))
+            _isOnSlope = angle < cvars.slopeLimit && angle > 5;
+
+            if (angle < cvars.slopeLimit)
             {
                 _isGrounded = true;
                 _groundNormal = cp.normal;

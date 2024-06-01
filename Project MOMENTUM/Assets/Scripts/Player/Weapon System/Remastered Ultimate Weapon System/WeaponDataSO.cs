@@ -3,24 +3,32 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Weapon Data", menuName = "Weapons/Weapon Data")]
 public class WeaponDataSO : ScriptableObject
 {
-    [Header("Cool things")]
-    [Tooltip("Allow player shoot if holding attack button when switching")]
-    public bool safety;
-    public bool canBeDualWielded;
-    public AmmoType ammoType;
+    public bool safetyLock;
+    public AmmoType primaryAmmoType;
+    public AmmoType secondaryAmmoType;
 
-    [Space]
     [Header("Weapon Stats")]
-    public int damage;
-    [Min(0)] public float range;
-
-    [Tooltip("Bullets per second")]
-    [Min(0)] public float fireRate;
-    [Min(0)] public int bulletsPerShot;
     [Min(1)] public int pellets;
     [Min(0)] public Vector2 spread;
 
+    [Header("Primary Attack")]
+    public bool isPrimaryAutomatic = true;
+    public int primaryDamage;
+    [Min(0)] public float primaryRange;
+    [Min(0)] public float primaryFireRate;
+    public bool primaryUseAmmo = true;
+    [Min(0)] public int bulletsPerShotPrimary;
+
+    [Header("Secondary Attack")]
+    public bool isSecondaryAutomatic = true;
+    public int secondaryDamage;
+    [Min(0)] public float secondaryRange;
+    [Min(0)] public float secondaryFireRate;
+    public bool secondaryUseAmmo = true;
+    [Min(0)] public int bulletsPerShotSecondary;
+
     [Header("Weapon Sounds")]
     public AudioClip fire1;
+    public AudioClip fire2;
     public AudioClip empty;
 }

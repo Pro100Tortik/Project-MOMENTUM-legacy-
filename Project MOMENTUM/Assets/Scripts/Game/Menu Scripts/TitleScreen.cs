@@ -17,23 +17,21 @@ public class TitleScreen : MonoBehaviour
     {
         Time.timeScale = 1.0f;
 
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
         EnableMenu(_menuIndex);
     }
 
-    private void Start() => _gm = GameManager.Instance;
+    private void Start()
+    {
+        _gm = GameManager.Instance;
+        GameFunctions.EnableCursor();
+    }
 
     #region Button Functions
-
-    #region Difficulties
-    public void SetDifficulty1() => _gm.SetDifficultyNoob();
-    public void SetDifficulty2() => _gm.SetDifficultyEasy();
-    public void SetDifficulty3() => _gm.SetDifficultyNormal();
-    public void SetDifficulty4() => _gm.SetDifficultyTrue();
-    public void SetDifficulty5() => _gm.SetDifficultyNightmare();
-    #endregion
+    public void SetDifficulty1() => _gm.SetDifficultyLevel(GameDifficulty.CanIPlayDaddy);
+    public void SetDifficulty2() => _gm.SetDifficultyLevel(GameDifficulty.ICanDoIT);
+    public void SetDifficulty3() => _gm.SetDifficultyLevel(GameDifficulty.NotSoCasual);
+    public void SetDifficulty4() => _gm.SetDifficultyLevel(GameDifficulty.UltraViolence);
+    public void SetDifficulty5() => _gm.SetDifficultyLevel(GameDifficulty.Nightmare);
 
     public void SinglePlayer() => NextMenu();
 

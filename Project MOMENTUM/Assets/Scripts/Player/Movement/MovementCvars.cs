@@ -28,7 +28,15 @@ public class MovementCvars
     public float crouchHeight = 1.0f; // The minimum capsule value (for (1, 2, 1))
     public float crouchTransitionSpeed = 4.0f;
 
+    [Header("Slide")]
+    public float slideMultiplier = 3.0f;
+    public float velocityToStart = 6.0f;
+    public float velocityToStop = 2.5f;
+    public float slideFriction = 2.0f;
+    public float slideTime = 1.05f;
+
     [Header("Other Variables")]
+    public float stepHeight = 0.3f;
     public float airSpeedCap = 1.0f;
     public float slopeLimit = 45.0f;
     public float groundFriction = 6f;

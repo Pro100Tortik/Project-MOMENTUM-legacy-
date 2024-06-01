@@ -13,6 +13,7 @@ public class EnemyHealth : MonoBehaviour, IDamagable
 
     [Header("Parameters")]
     [SerializeField] private float health = 35;
+    [SerializeField] private bool canBeOverkilled = true;
     [SerializeField] private int overkillDamage = -15;
     private GibSpawner _gibSpawner;
     private float _painTimer;
@@ -42,6 +43,12 @@ public class EnemyHealth : MonoBehaviour, IDamagable
         {
             IsDead = true;
             health = delta;
+
+            if (!canBeOverkilled)
+            {
+                Die();
+                return;
+            }
         }
 
         if (delta <= overkillDamage)
@@ -60,10 +67,17 @@ public class EnemyHealth : MonoBehaviour, IDamagable
     private void Die()
     {
         // Drop body
+        gameObject.SetActive(false);
     }
 
     private void Overkill()
     {
+        if (!canBeOverkilled)
+            return;
+
+        if (_gibSpawner == null)
+            return;
+
         _gibSpawner.GIB();
         gameObject.SetActive(false);
     }
