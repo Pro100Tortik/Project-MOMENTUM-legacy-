@@ -11,4 +11,14 @@ public static class Extensions
     public static void SetTextDynamic(this TextMeshProUGUI text, object value) => text.SetText(value.ToString());
     public static T GetRandomElement<T>(this IList<T> list) => list[Random.Range(0, list.Count)];
     public static T GetRandomElement<T>(this T[] array) => array[Random.Range(0, array.Length)];
+    public static float Wrap(this float value, float min, float max)
+    {
+        if (value < min)
+            return max;
+
+        if (value > max)
+            return min;
+
+        return value;
+    }
 }

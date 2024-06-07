@@ -7,9 +7,9 @@ namespace ProjectMOMENTUM
 {
     public class BasicBT : BehaviorTree.Tree
     {
+        [SerializeField] private float chaseSpeed = 7f;
         [SerializeField] private Transform[] waypoints;
         [SerializeField] private Transform body;
-        [SerializeField] private EnemyDataSO enemyData;
         [SerializeField] private NavMeshAgent agent;
         [SerializeField] private LayerMask levelMask;
         [SerializeField] private LayerMask targetMask;
@@ -21,7 +21,7 @@ namespace ProjectMOMENTUM
                 new Sequence(new List<Node>
                 {
                     new CheckEnemyInFOV(body, 20, 100, targetMask, levelMask),
-                    new TaskGoToTarget(agent, enemyData.chaseSpeed, 0.4f, 3f)
+                    new TaskGoToTarget(agent, chaseSpeed, 0.4f, 3f)
                 }),
                 //new TaskPatrol(body, agent, enemyData.patrolSpeed, waypoints, 3f),
             });

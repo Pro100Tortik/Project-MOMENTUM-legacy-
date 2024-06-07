@@ -1,3 +1,4 @@
+using ProjectMOMENTUM;
 using System;
 using UnityEngine;
 
@@ -16,7 +17,6 @@ public class PlayerController : MonoBehaviour
     public event Action<AudioClip> OnStep;
     public event Action<AudioClip> OnLadderMove;
     public event Action<AudioClip> OnJump;
-    public event Action OnSecretFound;
 
     [SerializeField] private Transform model;
 
@@ -683,13 +683,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        SecretTrigger secret = other.GetComponent<SecretTrigger>();
-        if (secret != null)
-        {
-            OnSecretFound?.Invoke();
-            secret.SecretFound();
-        }
-
         if (moveType == MoveType.Noclip)
             return;
 

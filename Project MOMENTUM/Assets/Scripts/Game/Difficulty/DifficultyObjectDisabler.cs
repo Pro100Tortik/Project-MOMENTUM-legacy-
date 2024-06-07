@@ -7,7 +7,7 @@ public class DifficultyObjectDisabler : MonoBehaviour
 
     private void Start()
     {
-        if (!DifficultyFunctions.CanSpawn(GameManager.Instance.GetDifficultyLevel(), spawnDifficulties))
+        if (!spawnDifficulties.HasFlag((GameDifficultiesWithFlags)GameManager.Instance.GetDifficultyLevel()))
         {
             gameObject.SetActive(false);
         }

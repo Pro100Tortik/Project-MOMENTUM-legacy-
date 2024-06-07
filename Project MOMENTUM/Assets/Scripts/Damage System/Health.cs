@@ -8,6 +8,7 @@ public class Health : MonoBehaviour, IDamagable
     [SerializeField] private int _maxArmor = 100;
     private float _currentDamageResistFactor;
     private ArmorType _currentArmorType;
+
     public bool IsDead { get; private set; } = false;
     public bool CanBeDamaged { get; private set; } = true;
 

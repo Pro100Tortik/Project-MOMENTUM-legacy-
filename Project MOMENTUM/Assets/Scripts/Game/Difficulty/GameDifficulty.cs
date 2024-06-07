@@ -11,9 +11,9 @@ public enum GameDifficultiesWithFlags
 
 public enum GameDifficulty
 {
-    CanIPlayDaddy,
-    ICanDoIT,
-    NotSoCasual,
-    UltraViolence,
-    Nightmare
+    CanIPlayDaddy = GameDifficultiesWithFlags.CanIPlayDaddy,
+    ICanDoIT = GameDifficultiesWithFlags.ICanDoIT,
+    NotSoCasual = GameDifficultiesWithFlags.NotSoCasual,
+    UltraViolence = GameDifficultiesWithFlags.UltraViolence,
+    Nightmare = GameDifficultiesWithFlags.Nightmare,
 }

@@ -8,7 +8,6 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     public event Action<AudioClip> OnPickup;
     public event Action OnDeath;
 
-
     [SerializeField, Range(0, 200)] private float health = 100;
     [SerializeField] private int maxHealth = 100;
     [SerializeField, Range(0, 200)] private float armor = 0;
@@ -17,14 +16,10 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 
     [Header("Sounds")]
     //[SerializeField] private float painTimerCooldown = 0.5f;
-    [SerializeField] private AudioClip powerupArmor;
-    [SerializeField] private AudioClip powerupHealth;
-    [SerializeField] private AudioClip powerupDamageResist;
     [SerializeField] private AudioClip healSound;
     [SerializeField] private AudioClip armorSound;
     [SerializeField] private List<AudioClip> painSounds;
 
-    private float _damageResistTimer;
     private float _painTimer;
     private float _currentDamageResistFactor;
     private bool _isDead = false;
@@ -73,9 +68,6 @@ public class PlayerHealth : MonoBehaviour, IDamagable
             return;
 
         PainSoundTrigger();
-
-        if (_damageResistTimer > 0)
-            return;
 
         DamageLogic(damage);
     }
@@ -213,34 +205,6 @@ public class PlayerHealth : MonoBehaviour, IDamagable
                     OnPickup?.Invoke(armorSound);
                     other.gameObject.SetActive(false);
                 }
-            }
-        }
-
-        Powerup powerup = other.GetComponent<Powerup>();
-        if (powerup)
-        {
-            if (powerup.GetPowerupType == PowerupType.MegaHealth)
-            {
-                if (RestoreHealth(100, false))
-                {
-                    other.gameObject.SetActive(false);
-                    OnPickup?.Invoke(powerupHealth);
-                }
-            }
-            if (powerup.GetPowerupType == PowerupType.MegaArmor)
-            {
-                if (RestoreArmor(100, false))
-                {
-                    _currentArmorType = ArmorType.Blue;
-                    other.gameObject.SetActive(false);
-                    OnPickup?.Invoke(powerupArmor);
-                }
-            }
-            if (powerup.GetPowerupType == PowerupType.DamageResist)
-            {
-                _damageResistTimer += 30.0f;
-                other.gameObject.SetActive(false);
-                OnPickup?.Invoke(powerupDamageResist);
             }
         }
     }

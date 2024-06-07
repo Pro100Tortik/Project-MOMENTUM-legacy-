@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CameraController : MonoBehaviour
+public class CameraController : Singleton<CameraController>
 {
     [Header("Settings")]
     [SerializeField] private float sensitivity = 1.0f;
@@ -54,7 +54,8 @@ public class CameraController : MonoBehaviour
         _pitch += -Input.GetAxisRaw("Mouse Y") * sensitivity;
 
         _pitch = Mathf.Clamp(_pitch, yRotationClamp.x, yRotationClamp.y);
-        _yaw = _yaw < -180.0f ? _yaw = 180.0f : _yaw > 180.0f ? _yaw = -180.0f : _yaw;
+        //_yaw = _yaw < -180.0f ? _yaw = 180.0f : _yaw > 180.0f ? _yaw = -180.0f : _yaw;
+        _yaw = _yaw.Wrap(-180f, 180f);
 
         orientation.localRotation = Quaternion.Euler(0, _yaw, 0);
     }
@@ -63,6 +64,8 @@ public class CameraController : MonoBehaviour
     {
         transform.localRotation = Quaternion.Euler(_pitch, _yaw, 90);
     }
+
+    public void RotateCamera(float x) => _yaw = x;
 
     public void RotateCamera(float x, float y)
     {
